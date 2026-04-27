@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geogian cargo</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/v/ju/jq-3.6.0/jszip-2.5.0/dt-1.12.1/af-2.4.0/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/date-1.1.2/fc-4.1.0/fh-3.2.4/kt-2.7.0/r-2.3.0/rg-1.2.0/rr-1.2.8/sc-2.0.7/sb-1.3.4/sp-2.0.2/sl-1.4.0/sr-1.1.1/datatables.min.css"
+    />
+    <style>
+      #themeTable_wrapper {
+        margin-top: 0px;
+      }
+
+      nav {
+        border-bottom: 1px solid #afacac;
+      }
+
+      div.dt-buttons {
+        position: fixed;
+        /* float: left; */
+        top: 69px;
+        left: 215px;
+        z-index: 99;
+      }
+      #themeTable_length {
+        position: fixed;
+        top: 75px;
+        left: 25px;
+        z-index: 99;
+      }
+      #themeTable_info {
+        position: fixed;
+        top: 126px;
+        left: 840px;
+        z-index: 99;
+      }
+      #themeTable_paginate {
+        position: fixed;
+        left: 400px;
+        top: 125px;
+        z-index: 99;
+      }
+      #themeTable_filter label {
+        position: fixed;
+        left: 22px;
+        top: 130px;
+        z-index: 99;
+      }
+      #themeTable_filter label input {
+        background-color: white;
+      }
+      .menu-container {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        z-index: 89 !important;
+      }
+      .dtfc-fixed-left {
+        border: 1px solid rgb(73, 73, 73);
+        width: 100px;
+        height: 100px;
+        box-shadow: 4px 0 3px -2px rgb(173, 173, 173);
+      }
+      .even,
+      .even td {
+        background-color: #ededed !important;
+      }
+      .button {
+        background-color: #1ea5de;
+        border-color: #1ea5de;
+        color: #fff;
+        text-align: center;
+        font-size: 16px;
+        margin: 4px 2px;
+        transition: 0.3s;
+        display: inline-block;
+        text-decoration: none;
+        cursor: pointer;
+        border-radius: 0.3125rem;
+      }
+
+      .button:hover {
+        opacity: 1;
+      }
+      .menu-container {
+        padding-bottom: 115px !important;
+      }
+
+      .btn-cargo {
+        color: #ffffff;
+        background-color: #a2cc3a;
+        border-color: #a2cc3a;
+      }
+
+      .btn-cargo:hover,
+      .btn-cargo:focus,
+      .btn-cargo:active,
+      .btn-cargo.active,
+      .open .dropdown-toggle.btn-cargo {
+        color: #ffffff;
+        background-color: #8eb037;
+        border-color: #a2cc3a;
+      }
+
+      .btn-cargo:active,
+      .btn-cargo.active,
+      .open .dropdown-toggle.btn-cargo {
+        background-image: none;
+      }
+
+      .btn-cargo.disabled,
+      .btn-cargo[disabled],
+      fieldset[disabled] .btn-cargo,
+      .btn-cargo.disabled:hover,
+      .btn-cargo[disabled]:hover,
+      fieldset[disabled] .btn-cargo:hover,
+      .btn-cargo.disabled:focus,
+      .btn-cargo[disabled]:focus,
+      fieldset[disabled] .btn-cargo:focus,
+      .btn-cargo.disabled:active,
+      .btn-cargo[disabled]:active,
+      fieldset[disabled] .btn-cargo:active,
+      .btn-cargo.disabled.active,
+      .btn-cargo[disabled].active,
+      fieldset[disabled] .btn-cargo.active {
+        background-color: #a2cc3a;
+        border-color: #a2cc3a;
+      }
+
+      .btn-cargo .badge {
+        color: #a2cc3a;
+        background-color: #ffffff;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script
+      src="https://code.jquery.com/jquery-3.6.1.min.js"
+      integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"
+    ></script>
+    <script src="fetch.js"></script>
+
+    <script>
+      //////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////
+      var graphBlock = $("#themeTable");
+      var url = new URL(domain + "/statistics/customers?currency=gbp,eur");
+      var currency_symbols = {
+        USD: "$", // US Dollar
+        EUR: "€", // Euro
+        CRC: "₡", // Costa Rican Colón
+        GBP: "£", // British Pound Sterling
+        ILS: "₪", // Israeli New Sheqel
+        INR: "₹", // Indian Rupee
+        JPY: "¥", // Japanese Yen
+        KRW: "₩", // South Korean Won
+        NGN: "₦", // Nigerian Naira
+        PHP: "₱", // Philippine Peso
+        PLN: "zł", // Polish Zloty
+        PYG: "₲", // Paraguayan Guarani
+        THB: "฿", // Thai Baht
+        UAH: "₴", // Ukrainian Hryvnia
+        VND: "₫", // Vietnamese Dong
+      };
+    </script>
+  </head>
+
+  <body>
+    <nav class="menu-container">
+      <!-- burger menu -->
+      <input type="checkbox" aria-label="Toggle menu" />
+      <span></span>
+      <span></span>
+      <span></span>
+
+      <!-- logo -->
+      <a href="/" class="menu-logo">
+        <img src="logo.png" alt="" />
+      </a>
+
+      <!-- menu items -->
+      <div class="menu" style="margin-top: 15px">
+        <ul>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage'"
+            >
+              Manage
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage/items'"
+            >
+              Items
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage/transactions'"
+            >
+              Transactions
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage/cargo/statistics'"
+            >
+              Cargos
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = '/reports/customers.html#'+ window.location.href.split('#')[1]"
+            >
+              Clients
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = '/reports/staffforms.html#'+ window.location.href.split('#')[1]"
+            >
+              Edit Agent
+            </a>
+          </li>
+        </ul>
+        <!-- <ul>
+        <li>
+          <a href="#signup">
+            Sign-up
+          </a>
+        </li>
+        <li>
+          <a href="#login">
+            Login
+          </a>
+        </li>
+      </ul> -->
+      </div>
+    </nav>
+    <div class="mb-3 row p-3" style="margin-top: 200px">
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="dateFrom">Date from:</label>
+        <input
+          type="date"
+          id="dateFrom"
+          class="form-control"
+          value=""
+          onchange="buildParam('datefrom', document.getElementById('dateFrom').value)"
+        />
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="dateTo">Date to:</label>
+        <input
+          type="date"
+          id="dateTo"
+          class="form-control"
+          value=""
+          onchange="buildParam('dateto', document.getElementById('dateTo').value)"
+        />
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="route">Route:</label>
+        <select
+          class="form-control"
+          id="route"
+          onchange="buildParam('route', document.getElementById('route').value)"
+        >
+          <option value="">All</option>
+          <option value="GE/IE">GE/IE</option>
+          <option value="GE/SE">GE/SE</option>
+          <option value="GE/UK">GE/UK</option>
+          <option value="IE/GE">IE/GE</option>
+          <option value="SE/GE">SE/GE</option>
+          <option value="UK/GE">UK/GE</option>
+        </select>
+      </div>
+
+      <div class="ml-auto col-4">
+        <label>&nbsp;</label>
+        <div role="group" class="d-flex align-items-end btn-group">
+          <button
+            id="filter-button"
+            type="button"
+            class="btn btn-warning btn-block"
+            onClick="getData()"
+          >
+            Filter
+            <span
+              class="d-none spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 0px">
+      <table
+        id="themeTable"
+        class="table table-striped table-bordered sortable-theme-light"
+        data-sortable=""
+        data-sortable-initialized="true"
+      >
+        <thead>
+          <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Currency</th>
+            <th>Freight</th>
+            <th>Packaging</th>
+            <th>Delivery</th>
+            <th>Extra</th>
+            <th>Discount</th>
+            <th>Paid</th>
+            <th>Unpaid</th>
+            <th>Weight</th>
+            <th>Parcels Count</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.datatables.net/v/ju/jq-3.6.0/jszip-2.5.0/dt-1.12.1/af-2.4.0/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/date-1.1.2/fc-4.1.0/fh-3.2.4/kt-2.7.0/r-2.3.0/rg-1.2.0/rr-1.2.8/sc-2.0.7/sb-1.3.4/sp-2.0.2/sl-1.4.0/sr-1.1.1/datatables.min.js"
+    ></script>
+    <script>
+      getData();
+      function buildParam(key, value) {
+        url.searchParams.set(key, value);
+      }
+      function getData() {
+        $("#filter-button span").removeClass("d-none");
+        $("#filter-button").prop("disabled", true);
+        fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: bearer,
+            "Content-Type": "application/json",
+          },
+        })
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (json) {
+            $("#themeTable").DataTable({
+              bDestroy: true,
+              data: json.customers.map((tag) => Object.values(tag)),
+              columnts: [
+                { data: "id" },
+                { data: "name" },
+                { data: "email" },
+                { data: "username" },
+                { data: "invoice_currency_code" },
+                { data: "cargo_freight_price_total" },
+                { data: "cargo_packaging_price_total" },
+                { data: "cargo_delivery_price_total" },
+                { data: "extra_total" },
+                { data: "cargo_discount_total" },
+                { data: "cargo_total_price" },
+                { data: "unpaid" },
+                { data: "cargo_weight_total" },
+                { data: "total_parcels" },
+              ],
+              fixedColumns: {
+                left: 3,
+                heightMatch: "none",
+              },
+              columnDefs: [
+                {
+                  defaultContent: "---",
+                  targets: "_all",
+                  createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).css("padding", "6px");
+                  },
+                },
+                {
+                  targets: 2,
+                  render: function (data, type, row) {
+                    if (row[2] != null) {
+                      return (
+                        '<a href = "/reports/customer.html?id=' +
+                        row[0] +
+                        "#" +
+                        window.location.href.split("#")[1] +
+                        '" target="_blank">' +
+                        row[2] +
+                        "</a>"
+                      );
+                    }
+                  },
+                },
+                {
+                  targets: 0,
+                  render: function (data, type, row, meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                  },
+                },
+                {
+                  targets: 5,
+                  render: function (data, type, row) {
+                    return (
+                      currency_symbols[row[4]] +
+                      row[5]
+                        .toFixed(2)
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    );
+                  },
+                },
+                {
+                  targets: 6,
+                  render: function (data, type, row) {
+                    return (
+                      currency_symbols[row[4]] +
+                      row[6]
+                        .toFixed(2)
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    );
+                  },
+                },
+                {
+                  targets: 7,
+                  render: function (data, type, row) {
+                    return (
+                      currency_symbols[row[4]] +
+                      row[7]
+                        .toFixed(2)
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    );
+                  },
+                },
+                {
+                  targets: 8,
+                  render: function (data, type, row) {
+                    return (
+                      currency_symbols[row[4]] +
+                      row[8]
+                        .toFixed(2)
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    );
+                  },
+                },
+                {
+                  targets: 9,
+                  render: function (data, type, row) {
+                    return (
+                      currency_symbols[row[4]] +
+                      row[9]
+                        .toFixed(2)
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    );
+                  },
+                },
+                {
+                  targets: 11,
+                  render: function (data, type, row) {
+                    return (
+                      '<p style="color:red!important;">' +
+                      currency_symbols[row[4]] +
+                      row[11]
+                        .toFixed(2)
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                      "</p>"
+                    );
+                  },
+                },
+                {
+                  targets: 10,
+                  render: function (data, type, row) {
+                    return (
+                      '<p style="color:green!important;">' +
+                      currency_symbols[row[4]] +
+                      row[10]
+                        .toFixed(2)
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                      "</p>"
+                    );
+                  },
+                },
+                // {
+                //   targets: 14,
+                //   render: function (data, type, row) {
+                //     return (
+                //       currency_symbols[row[4]] +
+                //       row[14]
+                //         .toFixed(2)
+                //         .toString()
+                //         .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                //     );
+                //   },
+                // },
+                // {
+                //   targets: 15,
+                //   render: function (data, type, row) {
+                //     return (
+                //       currency_symbols[row[4]] +
+                //       row[15]
+                //         .toFixed(2)
+                //         .toString()
+                //         .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                //     );
+                //   },
+                // },
+                // {
+                //   targets: 16,
+                //   render: function (data, type, row) {
+                //     return (
+                //       currency_symbols[row[4]] +
+                //       row[16]
+                //         .toFixed(2)
+                //         .toString()
+                //         .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                //     );
+                //   },
+                // },
+                // {
+                //   targets: 17,
+                //   render: function (data, type, row) {
+                //     return (
+                //       currency_symbols[row[4]] +
+                //       row[17]
+                //         .toFixed(2)
+                //         .toString()
+                //         .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                //     );
+                //   },
+                // },
+                // {
+                //   targets: 18,
+                //   render: function (data, type, row) {
+                //     return (
+                //       currency_symbols[row[4]] +
+                //       row[18]
+                //         .toFixed(2)
+                //         .toString()
+                //         .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                //     );
+                //   },
+                // },
+                {
+                  // targets: 20,
+                  // render: function (data, type, row) {
+                  //   return (
+                  //     currency_symbols[row[4]] +
+                  //     row[20]
+                  //       .toFixed(2)
+                  //       .toString()
+                  //       .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  //   );
+                  // },
+                },
+              ],
+              dom: 'Blfrtip<"top"<"clear">>rt<"bottom"ifp<"clear">>',
+              fnDrawCallback: function (oSettings) {
+                // $("#loading-block").addClass("d-none");
+                $("#filter-button span").addClass("d-none");
+                $("#filter-button").prop("disabled", false);
+              },
+              buttons: [
+                { extend: "csv", text: "export csv", className: "button" },
+                { extend: "excel", text: "export excel", className: "button" },
+                { extend: "print", text: "print", className: "button" },
+              ],
+            });
+          });
+      }
+    </script>
+  </body>
+</html>

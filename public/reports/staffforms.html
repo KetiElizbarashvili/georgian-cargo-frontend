@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+    integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <link rel="stylesheet" type="text/css" href="bootstrap-tagsinput.css" />
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+    integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script src="fetch.js"></script>
+  <script src="bootstrap3-typeahead.min.js"></script>
+  <script src="bootstrap-tagsinput.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+  <style>
+    .bootstrap-tagsinput {
+      width: 100%;
+    }
+
+    .btn-cargo {
+      color: #FFFFFF;
+      background-color: #A2CC3A;
+      border-color: #A2CC3A;
+    }
+
+    .btn-cargo:hover,
+    .btn-cargo:focus,
+    .btn-cargo:active,
+    .btn-cargo.active,
+    .open .dropdown-toggle.btn-cargo {
+      color: #FFFFFF;
+      background-color: #8EB037;
+      border-color: #A2CC3A;
+    }
+
+    .btn-cargo:active,
+    .btn-cargo.active,
+    .open .dropdown-toggle.btn-cargo {
+      background-image: none;
+    }
+
+    .btn-cargo.disabled,
+    .btn-cargo[disabled],
+    fieldset[disabled] .btn-cargo,
+    .btn-cargo.disabled:hover,
+    .btn-cargo[disabled]:hover,
+    fieldset[disabled] .btn-cargo:hover,
+    .btn-cargo.disabled:focus,
+    .btn-cargo[disabled]:focus,
+    fieldset[disabled] .btn-cargo:focus,
+    .btn-cargo.disabled:active,
+    .btn-cargo[disabled]:active,
+    fieldset[disabled] .btn-cargo:active,
+    .btn-cargo.disabled.active,
+    .btn-cargo[disabled].active,
+    fieldset[disabled] .btn-cargo.active {
+      background-color: #A2CC3A;
+      border-color: #A2CC3A;
+    }
+
+    .btn-cargo .badge {
+      color: #A2CC3A;
+      background-color: #FFFFFF;
+    }
+  </style>
+  <title>Update staff</title>
+</head>
+
+<body>
+  <nav class="menu-container">
+    <!-- burger menu -->
+    <input type="checkbox" aria-label="Toggle menu" />
+    <span></span>
+    <span></span>
+    <span></span>
+
+    <!-- logo -->
+    <a href="/" class="menu-logo">
+      <img src="logo.png" alt="" />
+    </a>
+
+    <!-- menu items -->
+    <div class="menu" style="margin-top: 15px">
+      <ul>
+        <li>
+          <a role="button" onclick="window.location = window.location.origin + '/manage/summary'">
+            Summary
+          </a>
+        </li>
+        <li>
+          <a role="button" onclick="window.location = window.location.origin + '/manage'">
+            Manage
+          </a>
+        </li>
+        <li>
+          <a role="button" onclick="window.location = window.location.origin + '/manage/items'">
+            Items
+          </a>
+        </li>
+        <li>
+          <a role="button" onclick="window.location = window.location.origin + '/manage/transactions'">
+            Transactions
+          </a>
+        </li>
+        <li>
+          <a role="button" onclick="window.location = window.location.origin + '/manage/cargo/statistics'">
+            Cargos
+          </a>
+        </li>
+        <li>
+          <a role="button" onclick="window.location = window.location.origin + '/manage/clients'">
+            Clients
+          </a>
+        </li>
+        <li>
+          <a role="button" onclick="window.location = window.location.origin + '/manage/bookings'">
+            Bookings
+          </a>
+        </li>
+        <li>
+          <a role="button" onclick="window.location = '/reports/staffforms.html#'+ window.location.href.split('#')[1]">
+            Edit Agent
+          </a>
+        </li>
+      </ul>
+      <!-- <ul>
+      <li>
+        <a href="#signup">
+          Sign-up
+        </a>
+      </li>
+      <li>
+        <a href="#login">
+          Login
+        </a>
+      </li>
+    </ul> -->
+    </div>
+  </nav>
+
+  <div class="container-fluid" style="max-width:1600px;">
+    <div class="row">
+      <div class="col-sm-6">
+
+        <div class="card">
+          <div class="card-header">
+            Update agent <label class="control-label small">(down below we have all privileges and routes agent
+              has)</label>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title"></h5>
+            <p class="card-text">
+            <form>
+              <div id="updateAgentForm" class="d-none alert alert-danger" role="alert">
+              </div>
+              <center class="mb-4"></center>
+              <!-- Name input -->
+              <div class="form-outline mb-4 w-100">
+                <select class="form-control mb-3" id="agents-select" onchange="buildAgentForm()">
+                  <option value="" selected>Select agent</option>
+                </select>
+              </div>
+
+              <!-- Message input -->
+              <div class="form-outline mb-4">
+                <center>Agent privileges</center>
+                <select id="tagsinput" multiple></select>
+              </div>
+
+              <!-- Message input -->
+              <div class="form-outline mb-4">
+                <center>Agent routes</center>
+                <select id="routesinput" multiple></select>
+              </div>
+
+
+
+
+
+
+
+
+              <div class="accordion" id="accordionExample">
+                <div class="card">
+                  <div class="card-header" id="headingThree">
+                    <h2 class="mb-0">
+                      <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                        data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                          class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                          <path
+                            d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" />
+                        </svg>
+                        Agent details
+                      </button>
+                    </h2>
+                  </div>
+                  <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+                    data-parent="#accordionExample">
+                    <div class="card-body">
+                      <label class="control-label small">Fill only username if you want to update only username</label>
+                      <div class="form-outline mb-4">
+                        <center>New username</center>
+                        <input id="new_username" class="form-control" type="text">
+
+                      </div>
+                      <label class="control-label small">Fill only new password and confirm password if you want to
+                        assign agent new password</label>
+                      <div class="form-outline mb-4">
+                        <center>New password</center>
+                        <input id="new_password" class="form-control" type="password">
+
+                      </div>
+                      <div class="form-outline mb-4">
+                        <center>Repeat new password</center>
+                        <input id="confirm_password_update" class="form-control" type="password">
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              <br>
+
+
+
+
+
+
+              <!-- Submit button -->
+              <a href="javascript:update()" type="submit" class="btn btn-cargo float-right mb-4">
+                Update
+              </a>
+            </form>
+
+            </p>
+          </div>
+          <div class="card-footer">
+            you can
+            <a data-toggle="modal" data-target="#exampleModal" role="button" target="_blank"
+              class="text-decoration-none">
+              create new agent
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-window-stack" viewBox="0 0 16 16">
+                <path
+                  d="M4.5 6a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1ZM6 6a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1Zm2-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z" />
+                <path
+                  d="M12 1a2 2 0 0 1 2 2 2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2 2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h10ZM2 12V5a2 2 0 0 1 2-2h9a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1Zm1-4v5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8H3Zm12-1V5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v2h12Z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+
+
+      </div>
+      <div class="col-sm-6">
+
+        <div class="card mb-2">
+          <div class="card-header">
+            All privileges <label class="control-label small"> (down below we have all privileges agent does not
+              have)</label>
+          </div>
+          <div class="card-body">
+            <p class="card-text">
+            <ul id="all-privileges"></ul>
+
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            All routes <label class="control-label small"> (down below we have all routes agent does not have)</label>
+          </div>
+          <div class="card-body">
+            <p class="card-text">
+            <ul id="all-routes"></ul>
+
+            </p>
+          </div>
+          <div class="card-footer">
+            you can
+            <a role="button" onclick="window.location = window.location.origin + '/manage/routes/create'"
+              target="_blank" class="text-decoration-none">
+              create new route
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor"
+                class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                  d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z" />
+                <path fill-rule="evenodd"
+                  d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Register new agent</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+
+          <form>
+            <div id="newAgentForm" class="d-none alert alert-danger" role="alert">
+            </div>
+            <div class="form-outline mb-4">
+              <input type="text" id="username" class="form-control form-control-lg" />
+              <label class="form-label" for="form3Example1cg">Username</label>
+            </div>
+
+            <!-- <div class="form-outline mb-4">
+                  <input type="email" id="form3Example3cg" class="form-control form-control-lg" />
+                  <label class="form-label" for="form3Example3cg">Your Email</label>
+                </div> -->
+
+            <div class="form-outline mb-4">
+              <input type="password" id="password" class="form-control form-control-lg" />
+              <label class="form-label" for="form3Example4cg">Password</label>
+            </div>
+
+            <div class="form-outline mb-4">
+              <input type="password" id="confirm_password" class="form-control form-control-lg" />
+              <label class="form-label" for="form3Example4cdg">Repeat your password</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button onclick="register()" type="button" class="btn btn-cargo">Register</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+    crossorigin="anonymous"></script>
+
+  <script>
+
+    // $(document).ready(function() {
+    //     $("#exampleModal").modal();
+    //   });
+    var url = domain + "/staff";
+    var selectedAgent = null;
+    var agents;
+    var req = {};
+    var privileges = [];
+    var routes;
+    function getStaff() {
+      fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: bearer,
+          "Content-Type": "application/json",
+        },
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (json) {
+          $('#agents-select').empty();
+          $('#agents-select').append("<option value='' selected=''>Select agent</option>");
+          // var agentsSelectLength = $('#agents-select').children('option').length;
+          // if(agentsSelectLength == 1)
+          {
+
+            for (i = 0; i < json.agents.length; i++) {
+              $("#agents-select").append(
+                $("<option>", {
+                  value: json.agents[i].id,
+                  text: json.agents[i].username,
+                })
+              );
+            }
+          }
+          agents = json.agents;
+          return { agents };
+        })
+        .then((data) => {
+          // http://192.168.60.64/staff/privileges
+        });
+    }
+    getStaff();
+    var privilegesurl = domain + "/staff/privileges";
+    var routesurl = domain + "/routes";
+
+    /////////////////// privileges
+    const allprivileges = fetch(privilegesurl, {
+      method: "GET",
+      headers: {
+        Authorization: bearer,
+        "Content-Type": "application/json",
+      },
+    }).then((response) => response.json());
+
+    $("#tagsinput").tagsinput({
+      itemValue: 'id',
+      itemText: 'text',
+      typeahead: {
+        source: (async () => {
+          const result = await allprivileges;
+          return result.privileges;
+        })(),
+      },
+      freeInput: false,
+    });
+    /////////////////// routes
+
+    const allroutes = fetch(routesurl, {
+      method: "GET",
+      headers: {
+        Authorization: bearer,
+        "Content-Type": "application/json",
+      },
+    }).then((response) => response.json());
+
+    $("#routesinput").tagsinput({
+      itemValue: 'id',
+      itemText: 'text',
+      freeInput: false,
+    });
+
+
+    $('#tagsinput').on('beforeItemRemove', function (event) {
+      $("#all-privileges").append('<li class="btn btn-outline-secondary p-1 mb-2 ml-2" onclick="add(\'' + event.item.text + '\')">' + event.item.text + '</li>');
+    });
+    $('#routesinput').on('beforeItemRemove', function (event) {
+      // Do some processing here
+      $("#all-routes").append('<li class="btn btn-outline-secondary p-1 mb-2 ml-2" onclick="add_route(\'' + event.item.id + '\')">' + event.item.text + '</li>');
+    });
+    function buildAgentForm() {
+      req = { "username": null, "privileges": [], "routes": [], "new_username": null, "confirm_password": null, "new_password": null }
+      privileges = [];
+      $("#all-privileges").empty();
+      $("#all-routes").empty();
+      selectedAgent = agents.filter(obj => {
+        return parseInt(obj.id) === parseInt($("#agents-select").find(":selected").val())
+      })[0]
+      req.username = selectedAgent.username;
+
+      if (selectedAgent.privileges.length == 0) {
+        privileges = [];
+      }
+      else {
+        privileges = JSON.parse(
+          selectedAgent.privileges
+        );
+      }
+
+      if (selectedAgent.routes == null) {
+        routes = [];
+      }
+      else {
+        routes = JSON.parse(
+          selectedAgent.routes.replace(/'/g, '"')
+        );
+      }
+
+      $("#tagsinput").tagsinput("removeAll");
+
+      for (i = 0; i < privileges.length; i++) {
+        $("#tagsinput").tagsinput("add", { "id": i, "text": privileges[i] });
+      }
+
+      $("#routesinput").tagsinput("removeAll");
+
+      for (i = 0; i < routes.length; i++) {
+        $("#routesinput").tagsinput("add", { "id": [routes[i][0], routes[i][1]], "text": getFlagEmoji(routes[i][0]) + ' > ' + getFlagEmoji(routes[i][1]) });
+      }
+
+      var items = [];
+      var itemsroutes = [];
+
+      allprivileges.then(function (result) {
+        $.each(result.privileges, function (i, item) {
+          if (privileges.includes(item) == false) {
+            items.push('<li class="btn btn-outline-secondary p-1 mb-2 ml-2" onclick="add(\'' + item + '\')">' + item + '</li>');
+          }
+        });
+        $("#all-privileges").append(items.join(""));
+      });
+
+      allroutes.then(function (result) {
+        const arr = result.routes.map(object => ({ ...object }))
+        $.each(routes, function (i, item) {
+          var ind = arr.findIndex(o => o.source_country_code === item[0] && o.destination_country_code === item[1]);
+          arr.splice(ind, 1);
+        });
+        $.each(arr, function (i, item) {
+          // '<li class="btn btn-outline-secondary p-1 mb-2 ml-2" onclick="add_route(\''+event.item.id+'\')">' + event.item.text + '</li>'
+          itemsroutes.push('<li class="btn btn-outline-secondary p-1 mb-2 ml-2" onclick="add_route(\'' + item.source_country_code + ',' + item.destination_country_code + '\')">' + getFlagEmoji(item.source_country_code) + ' > ' + getFlagEmoji(item.destination_country_code) + '</li>');
+        });
+        $("#all-routes").append(itemsroutes.join(""));
+      });
+
+    }
+
+    function add(item) {
+      if ($("#agents-select").find(":selected").val() == '') {
+        alert('First select agent!');
+        return;
+      }
+
+      $("#tagsinput").tagsinput("add", { "id": item, "text": item });
+      $('#all-privileges li:contains("' + item + '")').remove();
+    }
+
+    function add_route(s) {
+      s = s.split(',');
+      if ($("#agents-select").find(":selected").val() == '') {
+        alert('First select agent!');
+        return;
+      }
+      $("#routesinput").tagsinput("add", { "id": [s[0], s[1]], "text": getFlagEmoji(s[0]) + ' > ' + getFlagEmoji(s[1]) });
+      $('#all-routes li:contains("' + getFlagEmoji(s[0]) + ' > ' + getFlagEmoji(s[1]) + '")').remove();
+    }
+
+    function getFlagEmoji(countryCode) {
+      if (countryCode == 'UK') {
+        countryCode = 'gb';
+      }
+      const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt());
+      return String.fromCodePoint(...codePoints);
+    }
+
+    function update() {
+      $("#updateAgentForm").empty();
+      var objPrivileges = $("#tagsinput").tagsinput('items');
+      var objRoutes = $("#routesinput").tagsinput('items');
+      req.new_username = $("#new_username").val().trim();
+      req.new_password = $("#new_password").val().trim();
+      req.confirm_password = $("#confirm_password_update").val().trim();
+
+      for (i = 0; i < objRoutes.length; i++) {
+        if (req.routes.indexOf(objRoutes[i].id) === -1) {
+          req.routes.push(objRoutes[i].id);
+        }
+      }
+      for (i = 0; i < objPrivileges.length; i++) {
+        if (req.privileges.indexOf(objPrivileges[i].text) === -1) {
+          req.privileges.push(objPrivileges[i].text);
+        }
+      }
+
+      fetch(domain + '/staff/update', {
+        method: "POST",
+        headers: {
+          Authorization: bearer,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(req)
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (json) {
+          console.log(json);
+          if (json.error == true) {
+
+
+            if (json.data != undefined && json.data.errors.length > 0) {
+              for (i = 0; i < json.data.errors.length; i++) {
+                $("#updateAgentForm").append("<P>" + json.data.errors[i]);
+              }
+              $("#updateAgentForm").removeClass("d-none");
+            }
+            else {
+              $("#updateAgentForm").addClass("d-none");
+            }
+
+            Toastify({
+              text: json.message,
+
+              duration: 3000,
+              style: {
+                background: "#ed1c24",
+              },
+
+            }).showToast();
+          }
+          else {
+            $("#updateAgentForm").addClass("d-none");
+            getStaff();
+            $("#tagsinput,#routesinput").tagsinput('removeAll');
+            $("#new_username").val('');
+            $("#new_password").val('');
+            $("#confirm_password_update").val('');
+            $("#collapseThree").collapse('toggle');
+            Toastify({
+
+              text: json.message,
+
+              duration: 3000,
+              style: {
+                background: "#07bc0c",
+              },
+
+            }).showToast();
+          }
+        });
+    }
+
+    function register() {
+      $("#newAgentForm").empty();
+      var agent = {
+        "username": $("#username").val().trim(),
+        "password": $("#password").val().trim(),
+        "confirm_password": $("#confirm_password").val().trim(),
+      };
+
+      fetch(domain + '/staff/save', {
+        method: "POST",
+        headers: {
+          Authorization: bearer,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(agent)
+      }).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        if (data.error == true) {
+          Toastify({
+
+            text: data.message,
+
+            duration: 3000,
+            style: {
+              background: "#ed1c24",
+            },
+
+          }).showToast();
+          if (data.data != undefined && data.data.errors.length > 0) {
+            for (i = 0; i < data.data.errors.length; i++) {
+              $("#newAgentForm").append("<P>" + data.data.errors[i]);
+            }
+            $("#newAgentForm").removeClass("d-none");
+          }
+          else {
+            $("#newAgentForm").addClass("d-none");
+          }
+
+        }
+        else {
+          getStaff();
+          Toastify({
+            text: data.message,
+            duration: 3000,
+            style: {
+              background: "#07bc0c",
+            },
+
+          }).showToast();
+          $('#exampleModal').modal('hide');
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

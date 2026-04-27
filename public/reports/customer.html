@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geogian cargo</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.6.1.min.js"
+      integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+      table.dataTable th,
+      table.dataTable td {
+        box-sizing: border-box !important;
+      }
+
+      #themeTable_wrapper {
+        margin-top: 180px;
+      }
+
+      div.dt-buttons {
+        position: fixed;
+        /* float: left; */
+        top: 69px;
+        left: 215px;
+        z-index: 99;
+      }
+      #themeTable_length {
+        position: fixed;
+        top: 75px;
+        left: 25px;
+        z-index: 99;
+      }
+      #themeTable_info {
+        position: fixed;
+        top: 126px;
+        left: 840px;
+        z-index: 99;
+      }
+      #themeTable_paginate {
+        position: fixed;
+        left: 400px;
+        top: 125px;
+        z-index: 99;
+      }
+      #themeTable_filter label {
+        position: fixed;
+        left: 22px;
+        top: 130px;
+        z-index: 99;
+      }
+      #themeTable_filter label input {
+        background-color: white;
+      }
+      .menu-container {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        z-index: 89 !important;
+      }
+      .dtfc-fixed-left {
+        border: 1px solid rgb(73, 73, 73);
+        width: 100px;
+        height: 100px;
+        box-shadow: 4px 0 3px -2px rgb(173, 173, 173);
+      }
+      .even,
+      .even td {
+        background-color: #ededed !important;
+      }
+      .button {
+        background-color: #f4511e;
+        color: white;
+        text-align: center;
+        font-size: 16px;
+        margin: 4px 2px;
+        transition: 0.3s;
+        display: inline-block;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .button:hover {
+        opacity: 1;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script
+      src="https://code.jquery.com/jquery-3.6.1.min.js"
+      integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"
+    ></script>
+    <script src="fetch.js"></script>
+
+    <script>
+      //////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////
+      var currency_symbols = {
+        USD: "$", // US Dollar
+        EUR: "€", // Euro
+        CRC: "₡", // Costa Rican Colón
+        GBP: "£", // British Pound Sterling
+        ILS: "₪", // Israeli New Sheqel
+        INR: "₹", // Indian Rupee
+        JPY: "¥", // Japanese Yen
+        KRW: "₩", // South Korean Won
+        NGN: "₦", // Nigerian Naira
+        PHP: "₱", // Philippine Peso
+        PLN: "zł", // Polish Zloty
+        PYG: "₲", // Paraguayan Guarani
+        THB: "฿", // Thai Baht
+        UAH: "₴", // Ukrainian Hryvnia
+        VND: "₫", // Vietnamese Dong
+      };
+
+      var graphBlock = $("#themeTable");
+      var customer_id = new URL(window.location.href).searchParams.get("id");
+      var url = new URL(
+        domain + "/statistics/customer?start=0&id=" + customer_id
+      );
+      console.log(url);
+      var currency_symbols = {
+        USD: "$", // US Dollar
+        EUR: "€", // Euro
+        CRC: "₡", // Costa Rican Colón
+        GBP: "£", // British Pound Sterling
+        ILS: "₪", // Israeli New Sheqel
+        INR: "₹", // Indian Rupee
+        JPY: "¥", // Japanese Yen
+        KRW: "₩", // South Korean Won
+        NGN: "₦", // Nigerian Naira
+        PHP: "₱", // Philippine Peso
+        PLN: "zł", // Polish Zloty
+        PYG: "₲", // Paraguayan Guarani
+        THB: "฿", // Thai Baht
+        UAH: "₴", // Ukrainian Hryvnia
+        VND: "₫", // Vietnamese Dong
+      };
+    </script>
+  </head>
+
+  <body>
+    <nav class="menu-container">
+      <!-- burger menu -->
+      <input type="checkbox" aria-label="Toggle menu" />
+      <span></span>
+      <span></span>
+      <span></span>
+
+      <!-- logo -->
+      <a href="/" class="menu-logo">
+        <img src="logo.png" alt="" />
+      </a>
+
+      <!-- menu items -->
+      <div class="menu" style="margin-top: 15px">
+        <ul>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage'"
+            >
+              Manage
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage/items'"
+            >
+              Items
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage/transactions'"
+            >
+              Transactions
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage/cargo/statistics'"
+            >
+              Cargos
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = '/reports/customers.html#'+ window.location.href.split('#')[1]"
+            >
+              Clients
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = '/reports/staffforms.html#'+ window.location.href.split('#')[1]"
+            >
+              Edit Agent
+            </a>
+          </li>
+        </ul>
+        <!-- <ul>
+        <li>
+          <a href="#signup">
+            Sign-up
+          </a>
+        </li>
+        <li>
+          <a href="#login">
+            Login
+          </a>
+        </li>
+      </ul> -->
+      </div>
+    </nav>
+
+    <div style="margin-top: 0px">
+      <div
+        id="loading-block"
+        class="spinner-border"
+        style="
+          width: 3rem;
+          height: 3rem;
+          margin-top: 200px !important;
+          position: absolute;
+          z-index: 99;
+          top: 0;
+          left: 50%;
+        "
+        role="status"
+      >
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+    <div class="row d-none" id="user-card">
+      <div class="col-md-4 jobs_index_middle_panels">
+        <div class="card ml-4" style="margin-top: 100px">
+          <div class="card-header" id="user-full-name"></div>
+          <div class="card-body">
+            <h5 class="card-title" id="user-email"></h5>
+            <a href="javascript:alert('soon...');" class="btn btn-warning"
+              >Send email</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="apex-charts" style="margin-top: 20px; margin-left: 10px"></div>
+    <script>
+      fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: bearer,
+          "Content-Type": "application/json",
+        },
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (json) {
+          var data = json.customer.data;
+          var totalParcels = 0;
+          var totalWeight = 0.0;
+          for (let i = 0; i < data.length; i++) {
+            var csschartid = "#chart" + i;
+            var $div = $("<div>", {
+              id: csschartid,
+              class: "ml-4 mb-4 card float-left",
+              style: "height: 400px;",
+            });
+
+            $("#apex-charts").append($div);
+
+            var options = {
+              title: {
+                text: "",
+                align: "left",
+                margin: 10,
+                offsetX: 0,
+                offsetY: 0,
+                floating: false,
+                style: {
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  fontFamily: undefined,
+                  color: "#263238",
+                },
+              },
+              theme: {
+                mode: "light",
+                palette: "palette2",
+                monochrome: {
+                  enabled: false,
+                  color: "#255aee",
+                  shadeTo: "light",
+                  shadeIntensity: 0.65,
+                },
+              },
+              dataLabels: {
+                enabled: false,
+              },
+              stroke: {
+                show: true,
+                width: 2,
+                colors: ["transparent"],
+              },
+              series: [],
+              chart: {
+                width: 650,
+                type: "bar",
+              },
+              plotOptions: {
+                bar: {
+                  horizontal: false,
+                  columnWidth: "55%",
+                  endingShape: "rounded",
+                },
+              },
+              xaxis: {
+                categories: [],
+              },
+              yaxis: {
+                title: {
+                  text: "",
+                },
+              },
+              fill: {
+                opacity: 1,
+              },
+              tooltip: {
+                y: {},
+              },
+            };
+            var keys = Object.keys(data[i]);
+            var len = keys.length;
+            // console.log(keys);
+            for (let j = 3; j < len; j++) {
+              options.series.push({
+                name: keys[j].split("_").join(" "),
+                data: [data[i][keys[j]]],
+              });
+              options.title.text =
+                getFlagEmoji(data[i][keys[1]]) +
+                " > " +
+                getFlagEmoji(data[i][keys[2]]) +
+                " (" +
+                data[i][keys[0]] +
+                ")";
+              options.xaxis.categories.push(options.title.text);
+              options.tooltip.y.formatter = function (val) {
+                return (
+                  currency_symbols[data[i][keys[0]]] +
+                  val
+                    .toFixed(2)
+                    .toString()
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                );
+              };
+              // options.title.text = '<span style="text-transform:capitalize">' + keys[j].split('_').join(' ') + ' - <b>'+ currency_symbols[data[i][keys[0]]] +data[i][keys[j]] + '</b></span>';
+            }
+            console.log(options.series);
+            // options.series.push(data[i][keys[17]]);
+            // options.labels.push(keys[17].split('_').join(' ') + ' - <b>'+ currency_symbols[data[i][keys[0]]] +data[i][keys[17]] + '</b>');
+            // console.log(len);
+            // console.log(data[i][keys[9]]);
+
+            // console.log(csschartid);
+            var chart = new ApexCharts(
+              document.getElementById(csschartid),
+              options
+            );
+            chart.render();
+            options = null;
+          }
+
+          // for (let i = 0; i < data.length; i++) {
+          //   var csschartid = '#chartaverage' + i;
+          //   var $div = $("<div>", {id: csschartid, 'class': 'ml-4 mb-4 card float-left', 'style': 'height: 400px;'});
+
+          //   $("#apex-charts").append($div);
+          //   var options = {
+          //     theme: {
+          //     mode: 'light',
+          //     palette: 'palette2',
+          //     monochrome: {
+          //         enabled: false,
+          //         color: '#255aee',
+          //         shadeTo: 'light',
+          //         shadeIntensity: 0.65
+          //     },
+          // },
+          //     title: {
+          //       text: '',
+          //       align: 'left',
+          //       margin: 10,
+          //       offsetX: 0,
+          //       offsetY: 0,
+          //       floating: false,
+          //       style: {
+          //         fontSize:  '14px',
+          //         fontWeight:  'bold',
+          //         fontFamily:  undefined,
+          //         color:  '#263238'
+          //       },
+          //   },
+          //   series: [],
+          //   chart: {
+          //   width: 650,
+          //   type: 'pie',
+          //   },
+          //   labels: [],
+
+          //   responsive: [{
+          //     breakpoint: 480,
+          //     options: {
+          //       chart: {
+          //         width: 400
+          //       },
+          //       legend: {
+          //         position: 'bottom'
+          //       }
+          //     }
+          // }]
+          // };
+          // var keys = Object.keys(data[i]);
+          // var len = keys.length;
+          // for (let j = 10; j < 16; j++)
+          // {
+          //   options.series.push(data[i][keys[j]]);
+          //   options.labels.push('<span style="text-transform:capitalize">' + keys[j].split('_').join(' ') + ' - <b>'+ currency_symbols[data[i][keys[0]]] +data[i][keys[j]] + '</b></span>');
+          // }
+
+          // // console.log(csschartid);
+          // options.title.text = 'Average prices: ' + data[i][keys[1]] + ' > ' + data[i][keys[2]] + ' (' + data[i][keys[0]] + ')';
+          // var chart = new ApexCharts(document.getElementById(csschartid), options);
+          // chart.render();
+          // options = null;
+          // }
+          var dat = json.customer;
+          return { dat, totalParcels, totalWeight };
+        })
+        .then((data) => {
+          $("#loading-block").addClass("d-none");
+          $("#user-card").removeClass("d-none");
+          $("#user-full-name").text(data.dat.name);
+          $("#user-email").text(data.dat.email);
+          // $('#total-parcels').text(data.totalParcels);
+          // $('#total-weight').text(data.totalWeight);
+        });
+      function getFlagEmoji(countryCode) {
+        if (countryCode == "UK") {
+          countryCode = "gb";
+        }
+        const codePoints = countryCode
+          .toUpperCase()
+          .split("")
+          .map((char) => 127397 + char.charCodeAt());
+        return String.fromCodePoint(...codePoints);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+.slick-prev:before {
+    content: "←" !important;
+    color: black !important;
+    font-family: "Font Awesome 5 Free" !important;
+    font-weight: 900 !important;
+    left: 0 !important;
+    position: absolute !important;
+    top: 0 !important;
+}
+.slick-next:before {
+    content: "→" !important;
+    color: black !important;
+    font-family: "Font Awesome 5 Free" !important;
+    font-weight: 900 !important;
+    left: 0 !important;
+    position: absolute !important;
+    top: 0 !important;
+}
+
+.custome-slider:hover {
+    box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+    background: #377dff !important;
+}
+.custome-slider {
+    display: block !important;
+    background: #f7faff !important;
+    padding: 1rem !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2) !important;
+}

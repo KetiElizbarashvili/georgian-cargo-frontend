@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.6.1.min.js"
+      integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      .select {
+        position: relative;
+        /* min-width: 200px; */
+      }
+      .select svg {
+        position: absolute;
+        right: 12px;
+        top: calc(50% - 3px);
+        width: 10px;
+        height: 6px;
+        stroke-width: 2px;
+        stroke: #9098a9;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        pointer-events: none;
+      }
+      .select select {
+        -webkit-appearance: none;
+        padding: 7px 40px 7px 12px;
+        /* width: 100%; */
+        border: 1px solid #e8eaed;
+        border-radius: 5px;
+        background: #fff;
+        box-shadow: 0 1px 3px -2px #9098a9;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 16px;
+        transition: all 150ms ease;
+      }
+      .select select:required:invalid {
+        color: #5a667f;
+      }
+      .select select option {
+        color: #223254;
+      }
+      .select select option[value=""][disabled] {
+        display: none;
+      }
+      .select select:focus {
+        outline: none;
+        border-color: #07f;
+        box-shadow: 0 0 0 2px rgba(0, 119, 255, 0.2);
+      }
+      .select select:hover + svg {
+        stroke: #07f;
+      }
+      .sprites {
+        position: absolute;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .btn-cargo {
+        color: #ffffff;
+        background-color: #a2cc3a;
+        border-color: #a2cc3a;
+      }
+
+      .btn-cargo:hover,
+      .btn-cargo:focus,
+      .btn-cargo:active,
+      .btn-cargo.active,
+      .open .dropdown-toggle.btn-cargo {
+        color: #ffffff;
+        background-color: #8eb037;
+        border-color: #a2cc3a;
+      }
+
+      .btn-cargo:active,
+      .btn-cargo.active,
+      .open .dropdown-toggle.btn-cargo {
+        background-image: none;
+      }
+
+      .btn-cargo.disabled,
+      .btn-cargo[disabled],
+      fieldset[disabled] .btn-cargo,
+      .btn-cargo.disabled:hover,
+      .btn-cargo[disabled]:hover,
+      fieldset[disabled] .btn-cargo:hover,
+      .btn-cargo.disabled:focus,
+      .btn-cargo[disabled]:focus,
+      fieldset[disabled] .btn-cargo:focus,
+      .btn-cargo.disabled:active,
+      .btn-cargo[disabled]:active,
+      fieldset[disabled] .btn-cargo:active,
+      .btn-cargo.disabled.active,
+      .btn-cargo[disabled].active,
+      fieldset[disabled] .btn-cargo.active {
+        background-color: #a2cc3a;
+        border-color: #a2cc3a;
+      }
+
+      .btn-cargo .badge {
+        color: #a2cc3a;
+        background-color: #ffffff;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="fetch.js"></script>
+    <script>
+      //////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////
+      ///////////////////////////////////////////////////////
+    </script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css"
+    />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>Georgian Cargo</title>
+  </head>
+
+  <body>
+    <nav class="menu-container">
+      <!-- burger menu -->
+      <input type="checkbox" aria-label="Toggle menu" />
+      <span></span>
+      <span></span>
+      <span></span>
+
+      <!-- logo -->
+      <a href="/" class="menu-logo">
+        <img src="logo.png" alt="" />
+      </a>
+
+      <!-- menu items -->
+      <div class="menu pt-3">
+        <ul>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage'"
+            >
+              Manage
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage/items'"
+            >
+              Items
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = window.location.origin + '/manage/transactions'"
+            >
+              Transactions
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = '/reports/cargo.html#'+ window.location.href.split('#')[1]"
+            >
+              Cargos
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = '/reports/customers.html#'+ window.location.href.split('#')[1]"
+            >
+              Clients
+            </a>
+          </li>
+          <li>
+            <a
+              role="button"
+              onclick="window.location = '/reports/staffforms.html#'+ window.location.href.split('#')[1]"
+            >
+              Edit Agent
+            </a>
+          </li>
+        </ul>
+        <div class="navbar-nav" style="margin-top: -6px">
+          <div class="text-right nav-item">
+            <button type="button" class="btn btn-danger" style="padding: 12px">
+              Logout
+            </button>
+          </div>
+        </div>
+        <!-- <ul>
+        <li>
+          <a href="#signup">
+            Sign-up
+          </a>
+        </li>
+        <li>
+          <a href="#login">
+            Login
+          </a>
+        </li>
+      </ul> -->
+      </div>
+    </nav>
+    <div>
+      <h3>
+        <center>
+          Cargo statistics
+          <!-- <a type="button" class="btn btn-warning" href="javascript:getData('years')">years</a>
+          <a type="button" class="btn btn-warning" href="javascript:getData('months')">months</a>
+          <a type="button" class="btn btn-warning" href="javascript:getData('days')">days</a> -->
+        </center>
+      </h3>
+    </div>
+
+    <div class="mb-3 row p-3">
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="paymentStatus">Payment status</label>
+        <select
+          class="form-control"
+          id="paymentStatus"
+          onchange="buildParam('paymentstatus', document.getElementById('paymentStatus').value)"
+        >
+          <option value="">All</option>
+          <option value="PAID">Paid</option>
+          <option value="PENDING">Not Paid</option>
+        </select>
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="paymentMethod">Payment method</label>
+        <select
+          class="form-control"
+          id="paymentMethod"
+          onchange="buildParam('paymentmethod', document.getElementById('paymentMethod').value)"
+        >
+          <option value="">All</option>
+          <option value="STRIPE">Stripe</option>
+          <option value="CASH">Cash</option>
+          <option value="BANK">Bank</option>
+          <option value="CARD">Card</option>
+        </select>
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="dateFrom">Date from:</label>
+        <input
+          type="date"
+          id="dateFrom"
+          class="form-control"
+          value=""
+          onchange="buildParam('datefrom', document.getElementById('dateFrom').value)"
+        />
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="dateTo">Date to:</label>
+        <input
+          type="date"
+          id="dateTo"
+          class="form-control"
+          value=""
+          onchange="buildParam('dateto', document.getElementById('dateTo').value)"
+        />
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="collectionOption">Collection:</label>
+        <select
+          class="form-control"
+          id="collectionOption"
+          onchange="buildParam('collection', document.getElementById('collectionOption').value)"
+        >
+          <option value="">All</option>
+          <option value="HOME">Home</option>
+          <option value="OFFICE">Office</option>
+        </select>
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="status">Status:</label>
+        <select
+          class="form-control"
+          id="status"
+          onchange="buildParam('status', document.getElementById('status').value)"
+        >
+          <option value="">All</option>
+          <option value="PENDING">Pending</option>
+          <option value="PICKED_UP">Picked up</option>
+          <option value="PROCESSING">Processing</option>
+          <option value="IN_TRANSIT">In transit</option>
+          <option value="ARRIVED">Arrived</option>
+          <option value="RECEIVED">Received</option>
+          <option value="DELAYED">Delayed</option>
+          <option value="RELEASED">Released</option>
+        </select>
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="route">Route:</label>
+        <select
+          class="form-control"
+          id="route"
+          onchange="buildParam('route', document.getElementById('route').value)"
+        >
+          <option value="">All</option>
+          <option value="GE/IE">GE/IE</option>
+          <option value="GE/SE">GE/SE</option>
+          <option value="GE/UK">GE/UK</option>
+          <option value="IE/GE">IE/GE</option>
+          <option value="SE/GE">SE/GE</option>
+          <option value="UK/GE">UK/GE</option>
+        </select>
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="agent">Agent:</label>
+        <select
+          class="form-control"
+          id="agent"
+          onchange="buildParam('agent', document.getElementById('agent').value)"
+        >
+          <option value="">All</option>
+          <option value="1">admin</option>
+          <option value="2">koba</option>
+          <option value="3">valer</option>
+          <option value="4">natia</option>
+          <option value="5">tamar</option>
+          <option value="6">victor</option>
+          <option value="7">sweden</option>
+        </select>
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <label for="interval">Interval:</label>
+        <select
+          class="form-control"
+          id="interval"
+          onchange="buildParam('interval', document.getElementById('interval').value)"
+        >
+          <option value="year">Year</option>
+          <option value="month" selected>Month</option>
+          <option value="week">Week</option>
+          <option value="day">Day</option>
+        </select>
+      </div>
+
+      <div class="ml-auto col-4">
+        <label>&nbsp;</label>
+        <div role="group" class="d-flex align-items-end btn-group">
+          <button
+            id="filter-button"
+            type="button"
+            class="btn btn-warning btn-block"
+            onClick="getData()"
+          >
+            Filter
+            <span
+              class="d-none spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="graph-block" class="w-auto p-3 d-none">
+      <center><h2>GBP</h2></center>
+      <div id="chart-years-gbp"></div>
+      <br />
+      <hr />
+      <br />
+      <center><h2>EUR</h2></center>
+      <div id="chart-years-eur"></div>
+      <div id="chart"></div>
+    </div>
+
+    <script type="text/javascript" src="routes.js"></script>
+    <script>
+      var graphBlock = $("#graph-block");
+      var currency_symbols = {
+        USD: "$", // US Dollar
+        EUR: "€", // Euro
+        CRC: "₡", // Costa Rican Colón
+        GBP: "£", // British Pound Sterling
+        ILS: "₪", // Israeli New Sheqel
+        INR: "₹", // Indian Rupee
+        JPY: "¥", // Japanese Yen
+        KRW: "₩", // South Korean Won
+        NGN: "₦", // Nigerian Naira
+        PHP: "₱", // Philippine Peso
+        PLN: "zł", // Polish Zloty
+        PYG: "₲", // Paraguayan Guarani
+        THB: "฿", // Thai Baht
+        UAH: "₴", // Ukrainian Hryvnia
+        VND: "₫", // Vietnamese Dong
+      };
+
+      var monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      var url = new URL(domain + "?interval=month");
+      url.pathname = "/statistics";
+      var years_for_select = [];
+      var months_for_select = monthNames;
+      var currentCurrency = [];
+
+      function resetChartInnerHtml() {
+        document.getElementById("chart-years-gbp").innerHTML = "";
+        document.getElementById("chart-years-eur").innerHTML = "";
+      }
+
+      function buildParam(key, value) {
+        url.searchParams.set(key, value);
+      }
+
+      function getData() {
+        $("#filter-button span").removeClass("d-none");
+        $("#filter-button").prop("disabled", true);
+
+        resetChartInnerHtml();
+        var years_gbp = {
+          series: [],
+          chart: {
+            type: "line",
+            height: 550,
+            zoom: {
+              enabled: false,
+            },
+            events: {
+              markerClick: function (
+                event,
+                chartContext,
+                { seriesIndex, dataPointIndex, config }
+              ) {
+                // redirectToMonth();
+                // console.log(seriesIndex + 1, dataPointIndex + 1);
+                var year = parseInt(years_gbp.xaxis.categories[dataPointIndex]);
+                var month =
+                  dataPointIndex + 1 == 12 ? 12 : (dataPointIndex % 12) + 1;
+                // console.log(year); //////////////////////
+              },
+            },
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: function (value) {
+              value = value || 0.0;
+              var symb = currency_symbols["GBP"];
+              var val = value
+                .toFixed(2)
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              return val;
+            },
+          },
+          stroke: {
+            curve: "straight",
+          },
+          fill: {
+            opacity: 0.3,
+          },
+          yaxis: {
+            min: 0,
+            labels: {
+              formatter: function (value) {
+                value = value || 0.0;
+                var symb = currency_symbols["GBP"];
+                var val = value
+                  .toFixed(2)
+                  .toString()
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                return val;
+              },
+            },
+          },
+          xaxis: {
+            categories: [],
+          },
+          theme: {
+            mode: "light",
+            palette: "palette2",
+            monochrome: {
+              enabled: false,
+              color: "#255aee",
+              shadeTo: "light",
+              shadeIntensity: 0.65,
+            },
+          },
+          title: {
+            text: "",
+            offsetX: 0,
+            style: {
+              fontSize: "24px",
+            },
+          },
+          subtitle: {
+            text: "Total price for " + currency_symbols["GBP"],
+            offsetX: 0,
+            style: {
+              fontSize: "14px",
+            },
+          },
+          grid: {
+            padding: {
+              left: 50,
+              right: 50,
+            },
+          },
+        };
+
+        var years_eur = {
+          series: [],
+          chart: {
+            type: "line",
+            height: 550,
+            zoom: {
+              enabled: false,
+            },
+            events: {
+              markerClick: function (
+                event,
+                chartContext,
+                { seriesIndex, dataPointIndex, config }
+              ) {
+                // redirectToMonth();
+                // console.log(seriesIndex + 1, dataPointIndex + 1);
+                var year = parseInt(years_eur.xaxis.categories[dataPointIndex]);
+                var month =
+                  dataPointIndex + 1 == 12 ? 12 : (dataPointIndex % 12) + 1;
+                // console.log(year); //////////////////////
+              },
+            },
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: function (value) {
+              value = value || 0.0;
+              var symb = currency_symbols["EUR"];
+              var val = value
+                .toFixed(2)
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              return val;
+            },
+          },
+          stroke: {
+            curve: "straight",
+          },
+          fill: {
+            opacity: 0.3,
+          },
+          yaxis: {
+            min: 0,
+            labels: {
+              formatter: function (value) {
+                value = value || 0.0;
+                var symb = currency_symbols["EUR"];
+                var val = value
+                  .toFixed(2)
+                  .toString()
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                return val;
+              },
+            },
+          },
+          xaxis: {
+            categories: [],
+          },
+          theme: {
+            mode: "light",
+            palette: "palette2",
+            monochrome: {
+              enabled: false,
+              color: "#255aee",
+              shadeTo: "light",
+              shadeIntensity: 0.65,
+            },
+          },
+          title: {
+            text: "",
+            offsetX: 0,
+            style: {
+              fontSize: "24px",
+            },
+          },
+          subtitle: {
+            text: "Total price for " + currency_symbols["EUR"],
+            offsetX: 0,
+            style: {
+              fontSize: "14px",
+            },
+          },
+          grid: {
+            padding: {
+              left: 50,
+              right: 50,
+            },
+          },
+        };
+        var typ = url.searchParams.get("interval");
+        fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: bearer,
+            "Content-Type": "application/json",
+          },
+        })
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (json) {
+            console.log(json);
+            var datt;
+
+            datt = json.data;
+
+            var arrayLength = datt.length;
+            var data_gbp = [];
+            var data_eur = [];
+
+            for (var i = 0; i < arrayLength; i++) {
+              if (datt[i].currency == "GBP") {
+                data_gbp.push(datt[i]);
+              }
+              if (datt[i].currency == "EUR") {
+                data_eur.push(datt[i]);
+              }
+            }
+            // console.log(data_eur);
+            // console.log(data_gbp);
+            var gbp_cargo_price_totals = [];
+            var gbp_cargo_freight_price_totals = [];
+            var gbp_cargo_delivery_price_totals = [];
+            var gbp_cargo_discount_totals = [];
+            var gbp_cargo_extra_charge_totals = [];
+            var gbp_cargo_packaging_price_totals = [];
+            var gbp_cargo_weights_totals = [];
+            var gbp_cargo_counts_totals = [];
+            var gbp_cargo_total_price = 0;
+
+            var eur_cargo_price_totals = [];
+            var eur_cargo_freight_price_totals = [];
+            var eur_cargo_delivery_price_totals = [];
+            var eur_cargo_discount_totals = [];
+            var eur_cargo_extra_charge_totals = [];
+            var eur_cargo_packaging_price_totals = [];
+            var eur_cargo_weights_totals = [];
+            var eur_cargo_counts_totals = [];
+            var eur_cargo_total_price = 0;
+
+            var currencies = [];
+            for (var i = 0; i < data_gbp.length; i++) {
+              if (data_gbp.length != 0) {
+                gbp_cargo_total_price += data_gbp[i].cargo_total_price;
+
+                gbp_cargo_price_totals.push(
+                  data_gbp[i].cargo_total_price.toFixed(2)
+                );
+                gbp_cargo_freight_price_totals.push(
+                  data_gbp[i].cargo_freight_price_total.toFixed(2)
+                );
+                gbp_cargo_delivery_price_totals.push(
+                  data_gbp[i].cargo_delivery_price_total.toFixed(2)
+                );
+                gbp_cargo_discount_totals.push(
+                  data_gbp[i].cargo_discount_total.toFixed(2)
+                );
+                gbp_cargo_extra_charge_totals.push(
+                  data_gbp[i].extra_total.toFixed(2)
+                );
+                gbp_cargo_packaging_price_totals.push(
+                  data_gbp[i].cargo_packaging_price_total.toFixed(2)
+                );
+                gbp_cargo_counts_totals.push(
+                  data_gbp[i].total_parcels.toFixed(2)
+                );
+                gbp_cargo_weights_totals.push(
+                  data_gbp[i].cargo_weight.toFixed(2)
+                );
+              }
+            }
+            for (var i = 0; i < data_eur.length; i++) {
+              if (data_eur.length != 0) {
+                eur_cargo_total_price += data_eur[i].cargo_total_price;
+                eur_cargo_price_totals.push(
+                  data_eur[i].cargo_total_price.toFixed(2)
+                );
+
+                eur_cargo_freight_price_totals.push(
+                  data_eur[i].cargo_freight_price_total.toFixed(2)
+                );
+                eur_cargo_delivery_price_totals.push(
+                  data_eur[i].cargo_delivery_price_total.toFixed(2)
+                );
+                eur_cargo_discount_totals.push(
+                  data_eur[i].cargo_discount_total.toFixed(2)
+                );
+                eur_cargo_extra_charge_totals.push(
+                  data_eur[i].extra_total.toFixed(2)
+                );
+                eur_cargo_counts_totals.push(
+                  data_eur[i].total_parcels.toFixed(2)
+                );
+                eur_cargo_packaging_price_totals.push(
+                  data_eur[i].cargo_packaging_price_total.toFixed(2)
+                );
+                eur_cargo_weights_totals.push(
+                  data_eur[i].cargo_weight.toFixed(2)
+                );
+              }
+            }
+            if (data_gbp.length != 0) {
+              years_gbp.title.text =
+                currency_symbols["GBP"] +
+                gbp_cargo_total_price
+                  .toFixed(2)
+                  .toString()
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              var gbp_cargo_price_total = {
+                name:
+                  "Total price" + "(<b>" + currency_symbols["GBP"] + "</b>)",
+                data: gbp_cargo_price_totals,
+              };
+
+              var gbp_cargo_freight_price_total = {
+                name:
+                  "Total freight price" +
+                  "(<b>" +
+                  currency_symbols["GBP"] +
+                  "</b>)",
+                data: gbp_cargo_freight_price_totals,
+              };
+              var gbp_cargo_weight_total = {
+                name: "Total weight",
+                data: gbp_cargo_weights_totals,
+              };
+              var gbp_cargo_delivery_price_total = {
+                name:
+                  "Cargo delivery price total" +
+                  "(<b>" +
+                  currency_symbols["GBP"] +
+                  "</b>)",
+                data: gbp_cargo_delivery_price_totals,
+              };
+
+              var gbp_cargo_discount_total = {
+                name:
+                  "Cargo discount price total" +
+                  "(<b>" +
+                  currency_symbols["GBP"] +
+                  "</b>)",
+                data: gbp_cargo_discount_totals,
+              };
+
+              var gbp_cargo_parcels_total = {
+                name: "Cargo parcels count",
+                data: gbp_cargo_counts_totals,
+              };
+
+              var gbp_cargo_extra_charge_total = {
+                name:
+                  "Cargo extra charge total" +
+                  "(<b>" +
+                  currency_symbols["GBP"] +
+                  "</b>)",
+                data: gbp_cargo_extra_charge_totals,
+              };
+
+              var gbp_cargo_packaging_price_total = {
+                name:
+                  "Cargo packaging  total" +
+                  "(<b>" +
+                  currency_symbols["GBP"] +
+                  "</b>)",
+                data: gbp_cargo_packaging_price_totals,
+              };
+            }
+
+            if (data_eur.length != 0) {
+              years_eur.title.text =
+                currency_symbols["EUR"] +
+                eur_cargo_total_price
+                  .toFixed(2)
+                  .toString()
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+              var eur_cargo_price_total = {
+                name:
+                  "Total price" + "(<b>" + currency_symbols["EUR"] + "</b>)",
+                data: eur_cargo_price_totals,
+              };
+
+              var eur_cargo_freight_price_total = {
+                name:
+                  "Total freight price" +
+                  "(<b>" +
+                  currency_symbols["EUR"] +
+                  "</b>)",
+                data: eur_cargo_freight_price_totals,
+              };
+              var eur_cargo_weight_total = {
+                name: "Total weight",
+                data: eur_cargo_weights_totals,
+              };
+              var eur_cargo_delivery_price_total = {
+                name:
+                  "Cargo delivery price total" +
+                  "(<b>" +
+                  currency_symbols["EUR"] +
+                  "</b>)",
+                data: eur_cargo_delivery_price_totals,
+              };
+
+              var eur_cargo_discount_total = {
+                name:
+                  "Cargo discount price total" +
+                  "(<b>" +
+                  currency_symbols["EUR"] +
+                  "</b>)",
+                data: eur_cargo_discount_totals,
+              };
+
+              var eur_cargo_parcels_total = {
+                name: "Cargo parcels count",
+                data: eur_cargo_counts_totals,
+              };
+
+              var eur_cargo_extra_charge_total = {
+                name:
+                  "Cargo extra charge total" +
+                  "(<b>" +
+                  currency_symbols["EUR"] +
+                  "</b>)",
+                data: eur_cargo_extra_charge_totals,
+              };
+
+              var eur_cargo_packaging_price_total = {
+                name:
+                  "Cargo packaging total" +
+                  "(<b>" +
+                  currency_symbols["EUR"] +
+                  "</b>)",
+                data: eur_cargo_packaging_price_totals,
+              };
+            }
+
+            if (data_gbp.length == 0) {
+              years_gbp.title.text = "No data found.";
+            }
+            if (data_eur.length == 0) {
+              years_eur.title.text = "No data found.";
+            }
+            console.log(data_eur);
+            for (var i = 0; i < data_eur.length; i++) {
+              if (data_eur.length != 0) {
+                if (years_for_select.indexOf(data_eur[i].year) === -1) {
+                  years_for_select.push(data_eur[i].year);
+                }
+                var dd1 =
+                  typeof data_eur[i].day === "undefined" ? "" : data_eur[i].day;
+                var ww1 =
+                  typeof data_eur[i].week === "undefined"
+                    ? ""
+                    : "- week " + (data_eur[i].week + 1);
+                var mm1 =
+                  typeof data_eur[i].month === "undefined"
+                    ? ""
+                    : data_eur[i].month;
+                years_eur.xaxis.categories.push(
+                  data_eur[i].year +
+                    " - " +
+                    dd1 +
+                    " " +
+                    monthNames[mm1 - 1] +
+                    " " +
+                    ww1
+                );
+              }
+            }
+            for (var i = 0; i < data_gbp.length; i++) {
+              if (data_gbp.length != 0) {
+                if (years_for_select.indexOf(data_gbp[i].year) === -1) {
+                  years_for_select.push(data_gbp[i].year);
+                }
+                var dd2 =
+                  typeof data_gbp[i].day === "undefined" ? "" : data_gbp[i].day;
+                var ww2 =
+                  typeof data_gbp[i].week === "undefined"
+                    ? ""
+                    : "- week " + (data_gbp[i].week + 1);
+                var mm2 =
+                  typeof data_gbp[i].month === "undefined"
+                    ? ""
+                    : data_gbp[i].month;
+                years_gbp.xaxis.categories.push(
+                  +data_gbp[i].year +
+                    " - " +
+                    dd2 +
+                    " " +
+                    monthNames[mm2 - 1] +
+                    " " +
+                    ww2
+                );
+              }
+            }
+
+            if (data_gbp.length != 0) {
+              years_gbp.series.push(gbp_cargo_price_total);
+              years_gbp.series.push(gbp_cargo_freight_price_total);
+              years_gbp.series.push(gbp_cargo_delivery_price_total);
+              years_gbp.series.push(gbp_cargo_extra_charge_total);
+              years_gbp.series.push(gbp_cargo_packaging_price_total);
+              years_gbp.series.push(gbp_cargo_discount_total);
+              years_gbp.series.push(gbp_cargo_parcels_total);
+              years_gbp.series.push(gbp_cargo_weight_total);
+            }
+
+            if (data_eur.length != 0) {
+              years_eur.series.push(eur_cargo_price_total);
+              years_eur.series.push(eur_cargo_freight_price_total);
+              years_eur.series.push(eur_cargo_delivery_price_total);
+              years_eur.series.push(eur_cargo_extra_charge_total);
+              years_eur.series.push(eur_cargo_packaging_price_total);
+              years_eur.series.push(eur_cargo_discount_total);
+              years_eur.series.push(eur_cargo_parcels_total);
+              years_eur.series.push(eur_cargo_weight_total);
+            }
+          })
+          .then(function () {
+            resetChartInnerHtml();
+            // fillYears();
+            // fillMonths();
+          })
+          .then(function () {
+            var chart_years_gbp = new ApexCharts(
+              document.querySelector("#chart-years-gbp"),
+              years_gbp
+            );
+            var chart_years_eur = new ApexCharts(
+              document.querySelector("#chart-years-eur"),
+              years_eur
+            );
+            $("#filter-button span").addClass("d-none");
+            $("#filter-button").prop("disabled", false);
+            graphBlock.removeClass("d-none");
+            chart_years_gbp.render();
+            chart_years_eur.render();
+          });
+      }
+
+      getData();
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
