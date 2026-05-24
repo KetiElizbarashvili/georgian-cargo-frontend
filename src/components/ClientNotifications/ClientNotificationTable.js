@@ -1,4 +1,4 @@
-import { capitalize } from "@material-ui/core";
+import { capitalize } from "@mui/material";
 import { useRequest } from "hooks";
 import { useEffect, useState } from "react";
 import clientNotificationSettings from "requests/clientNotificationSettings";

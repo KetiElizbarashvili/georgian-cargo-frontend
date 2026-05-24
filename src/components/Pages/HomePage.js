@@ -4,7 +4,8 @@ import { EmailSignupForm } from "components/EmailSignupForm";
 import { ClientFooter } from "components/Footer";
 import ItemsTable from "components/ItemsTable/ItemsTable";
 import TransactionsTable from "components/TransactionsTable/TransactionsTable";
-import { Slider, testimonials } from "utils";
+import { testimonials } from "utils";
+import SlickSlider from "react-slick";
 import PublicTrackingModal from "./PublicTrackingModal";
 import Collapse from 'react-bootstrap/Collapse';
 import { Link, useLocation, useHistory, useRouteMatch } from "react-router-dom";
@@ -31,13 +32,12 @@ const toastOptions = {
 };
 
 const HomePage = () => {
-  const [loyaltyModalShow, setLoyaltyModalSho] = useState(true);
-  const openModal = () => setLoyaltyModalSho(true);
-  const closeModal = () => setLoyaltyModalSho(false);
+  const [loyaltyModalShow, setLoyaltyModalShow] = useState(true);
+  const closeModal = () => setLoyaltyModalShow(false);
 
   return (
     <>
-      <main id="content" role="main" className="bg-light mt-lg-0 mt-xl-8 mt-xxl-8" style={{ minWidth: "308px" }}>
+      <main id="content" role="main" className="bg-light gc-landing" style={{ minWidth: "308px" }}>
         <div className="py-2 pt-11">
           <Hero />
         </div>
@@ -53,33 +53,55 @@ const HomePage = () => {
         <div className="space-2">
           <Articles />
         </div>
-        {console.log(window.location.pathname)}
         {(window.location.pathname !== '/home/register' && window.location.pathname !== '/home/login') && (
-          <Modal show={loyaltyModalShow}
+          <Modal
+            show={loyaltyModalShow}
             centered
-            backdrop={false}
             onHide={closeModal}
             size="lg"
+            aria-labelledby="referral-program-modal-title"
+            dialogClassName="gc-referral-modal"
           >
-            <Modal.Header closeButton>
-              <Modal.Title>Refferal Program </Modal.Title>
+            <Modal.Header closeButton className="border-0 pb-0">
+              <Modal.Title id="referral-program-modal-title" className="gc-referral-modal__title">
+                Referral Program
+              </Modal.Title>
             </Modal.Header>
-            <Modal.Body>
-              <div className='row'>
-                <div className='col-5'>
-                  <img className='d-inline-block w-100' src={"/images/undraw_gift_re_qr17.svg"} />
-
+            <Modal.Body className="pt-2">
+              <div className="gc-referral-modal__content">
+                <div className="gc-referral-modal__visual">
+                  <img
+                    className="gc-referral-modal__image"
+                    src="/images/undraw_gift_re_qr17.svg"
+                    width="300"
+                    height="300"
+                    alt="Referral gift illustration"
+                  />
                 </div>
-                <div className='col-7'>
-                  <h4>Woohoo, Very good news!</h4>
-                  <p>You can now start collecting points in our Refferal Program , converting them into coupons and then applying it to your parcels to get DISCOUNTS! 🥳</p>
-                  <small className='text-muted'>For more information please visit Loyalty page in your profile.</small>
+                <div className="gc-referral-modal__copy">
+                  <p className="gc-referral-modal__eyebrow">New</p>
+                  <h4 className="mb-3">Earn points and save on future deliveries</h4>
+                  <p className="mb-3">
+                    Invite friends, collect referral points, and convert those points into coupons you can apply to your parcels.
+                  </p>
+                  <ul className="gc-referral-modal__benefits">
+                    <li>Share your referral code from Loyalty page</li>
+                    <li>Receive points when invited users register</li>
+                    <li>Redeem points for parcel discounts</li>
+                  </ul>
+                  <small className="text-muted">
+                    You can manage everything from your Loyalty page in profile.
+                  </small>
                 </div>
               </div>
-
             </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={() => closeModal()}>Close</Button>
+            <Modal.Footer className="gc-referral-modal__footer border-0 pt-0">
+              <Button variant="outline-secondary" onClick={closeModal}>
+                Maybe later
+              </Button>
+              <Button as={Link} to="/dashboard/loyalty" variant="primary" onClick={closeModal}>
+                Open Loyalty
+              </Button>
             </Modal.Footer>
           </Modal>
         )}
@@ -90,6 +112,24 @@ const HomePage = () => {
     </>
   );
 };
+const ShipmentCard = ({ icon, name, from, price }) => (
+  <article className="gc-shipment-card">
+    <div className="gc-shipment-card__icon-wrap">
+      <i className={`${icon} gc-shipment-card__icon`} aria-hidden="true"></i>
+    </div>
+    <div className="gc-shipment-card__body">
+      <h4 className="gc-shipment-card__name">{name}</h4>
+      <p className="gc-shipment-card__route">
+        <i className="bi bi-geo-alt" aria-hidden="true"></i>
+        {from} <span aria-hidden="true">→</span> Georgia
+      </p>
+      <p className="gc-shipment-card__price">
+        {price} <span className="gc-shipment-card__vat">+ VAT</span>
+      </p>
+    </div>
+  </article>
+);
+
 const Hero = () => {
   const match = useRouteMatch();
   const { auth, setAuth } = useContext(AuthContext);
@@ -174,18 +214,28 @@ const Hero = () => {
     }
     if (cookies.allRoutes === undefined || cookies.allRoutes === 'undefined') {
       getRoutesData().then((r) => {
-        if (r !== undefined) {
-          setCookie('allRoutes', JSON.stringify(r.data.routes), { path: "/", expires: moment().add(1, "days").toDate() });
-          setAllRoutesData(countryListAllIsoData.filter(obj => {
-            return JSON.parse(JSON.stringify(r.data.routes)).map(a => a.code).includes(obj.value)
-          }));
+        const routes = r?.data?.routes;
+        if (Array.isArray(routes) && routes.length > 0) {
+          setCookie('allRoutes', JSON.stringify(routes), { path: "/", expires: moment().add(1, "days").toDate() });
+          setAllRoutesData(countryListAllIsoData.filter(obj =>
+            routes.map(a => a.code).includes(obj.value)
+          ));
         }
       });
     }
     else {
-      setAllRoutesData(countryListAllIsoData.filter(obj => {
-        return JSON.parse(JSON.stringify(cookies.allRoutes)).map(a => a.code).includes(obj.value)
-      }));
+      try {
+        const cached = typeof cookies.allRoutes === 'string'
+          ? JSON.parse(cookies.allRoutes)
+          : cookies.allRoutes;
+        if (Array.isArray(cached)) {
+          setAllRoutesData(countryListAllIsoData.filter(obj =>
+            cached.map(a => a.code).includes(obj.value)
+          ));
+        }
+      } catch (e) {
+        // stale/corrupt cookie — refetch on next render
+      }
     }
 
     // var width = 500,
@@ -272,124 +322,199 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
+    if (window.innerWidth < 768) return;
+
+    const earthNode = document.getElementById("earth");
+    if (!earthNode) return;
+
     const locations = [
-      [59.3293, 18.0686, 'https://flagsapi.com/SE/flat/48.png'], // sweden
-      [53.3498, 10.2603, 'https://flagsapi.com/IE/flat/48.png'], // ireland
-      [51.5072, -0.1276, 'https://flagsapi.com/GB/flat/48.png'], // uk
-      [38.1872, 44.5152, 'https://flagsapi.com/AM/flat/48.png'], // armenia
-      [41.6938, 44.8015, 'https://flagsapi.com/GE/flat/48.png'], // georgia
+      { lat: 59.3293, lon: 18.0686, countryCode: "SE", flag: "🇸🇪", label: "Sweden" },
+      { lat: 53.3498, lon: -6.2603, countryCode: "IE", flag: "🇮🇪", label: "Ireland" },
+      { lat: 51.5072, lon: -0.1276, countryCode: "GB", flag: "🇬🇧", label: "UK" },
+      { lat: 40.1872, lon: 44.5152, countryCode: "AM", flag: "🇦🇲", label: "Armenia" },
+      { lat: 41.6938, lon: 44.8015, countryCode: "GE", flag: "🇬🇪", label: "Georgia" },
     ];
-    const width = 500;
-    const height = 500;
-    const rotationSpeed = 0.02;
-    const svg = d3
-      .select("#earth")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
 
-    var defs = svg.append('svg:defs');
-
+    // Use a stable viewBox so the SVG scales with CSS without JS resize logic.
+    const VW = 500, VH = 380;
+    const cx = VW / 2, cy = VH / 2;
+    const globeScale = 170;
+    const markerR = 15;
+    const TILT = -12;
+    const AUTO_SPEED = 0.012; // degrees per ms
 
     const projection = d3
       .geoOrthographic()
-      .scale(250)
-      .translate([width / 2, height / 2])
-      .clipAngle(90); // Clip to a hemisphere
+      .scale(globeScale)
+      .translate([cx, cy])
+      .clipAngle(90)
+      .rotate([-25, TILT]);
+
     const path = d3.geoPath().projection(projection);
+    const graticule = d3.geoGraticule10();
 
-    const markerProjection = d3.geoOrthographic()
-      .scale(108)
-      .translate(projection.translate());
+    const isVisible = (loc) =>
+      d3.geoDistance([loc.lon, loc.lat], projection.invert([cx, cy])) < Math.PI / 2 + 0.05;
 
-    d3.json(
-      "https://s3-us-west-2.amazonaws.com/s.cdpn.io/95802/world-110m.json"
-    ).then((data) => {
-      svg
-        .append("path")
-        .datum({ type: "Sphere" })
-        .attr("d", path)
-        .attr("fill", "#e5eef3")
-        .attr("stroke", "#607D8B")
-        .attr("stroke-width", 0.5);
+    const svg = d3.select("#earth")
+      .append("svg")
+      .attr("viewBox", `0 0 ${VW} ${VH}`)
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .style("width", "100%")
+      .style("height", "100%");
 
-      svg
-        .selectAll(".country")
-        .data(topojson.feature(data, data.objects.countries).features)
-        .enter()
-        .append("path")
-        .attr("class", "country")
-        .attr("d", path)
-        .attr("fill", "#1CA3DD")
-        .attr("stroke", "#fff")
-        .attr("stroke-width", 0.5);
+    // ── Defs ──────────────────────────────────────────────────────────────────
+    const defs = svg.append("defs");
 
-      locations.forEach((itm, i) => {
-        defs.append("svg:pattern")
-          .attr("id", `grump_avatar${i}`)
-          .attr("width", 48)
-          .attr("height", 48)
-          .attr("x", 0)
-          .attr("y", 0)
-          // .attr('patternUnits', 'userSpaceOnUse')
-          .append("svg:image")
-          .attr("xlink:href", itm[2])
-          .attr("width", 32)
-          .attr("height", 32);
+    defs.append("radialGradient")
+      .attr("id", "gc-globe-ocean")
+      .attr("cx", "38%").attr("cy", "35%").attr("r", "62%")
+      .selectAll("stop")
+      .data([
+        { offset: "0%",   color: "#f5faff" },
+        { offset: "55%",  color: "#c8e3f5" },
+        { offset: "100%", color: "#a8cfe8" },
+      ])
+      .enter().append("stop")
+      .attr("offset", d => d.offset)
+      .attr("stop-color", d => d.color);
 
+    // Subtle ambient glow behind the sphere
+    const glow = defs.append("filter").attr("id", "gc-globe-glow").attr("x", "-30%").attr("y", "-30%").attr("width", "160%").attr("height", "160%");
+    glow.append("feGaussianBlur").attr("stdDeviation", "8").attr("result", "blur");
+    glow.append("feComposite").attr("in", "SourceGraphic").attr("in2", "blur").attr("operator", "over");
 
-        svg
-          .selectAll(".location")
-          .data(locations)
-          .enter()
-          .append("circle")
-          .attr("class", "location")
-          .attr("r", 15)
-          .attr("fill", function (d, i) {
-            return "url(#grump_avatar" + i + ")"
-          })
-          .attr("visibility", function (d) {
-            // Hide the location if it's not in the visible hemisphere
-            return d3.geoDistance(
-              [itm[1], itm[0]],
-              projection.invert([width / 2, height / 2])
-            ) >
-              Math.PI / 2
-              ? "hidden"
-              : "visible";
-          });
+    const shadow = defs.append("filter").attr("id", "gc-globe-shadow").attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "150%");
+    shadow.append("feDropShadow").attr("dx", 0).attr("dy", 8).attr("stdDeviation", 10).attr("flood-color", "#0f172a").attr("flood-opacity", 0.22);
+
+    // ── Layers ────────────────────────────────────────────────────────────────
+    // Outer glow circle
+    svg.append("circle")
+      .attr("cx", cx).attr("cy", cy).attr("r", globeScale + 4)
+      .attr("fill", "rgba(28,163,221,0.07)")
+      .attr("filter", "url(#gc-globe-glow)");
+
+    const spherePath = svg.append("path")
+      .datum({ type: "Sphere" })
+      .attr("fill", "url(#gc-globe-ocean)")
+      .attr("stroke", "#6fa8cc")
+      .attr("stroke-width", 0.8)
+      .attr("filter", "url(#gc-globe-shadow)");
+
+    const graticulePath = svg.append("path")
+      .datum(graticule)
+      .attr("fill", "none")
+      .attr("stroke", "rgba(255,255,255,0.28)")
+      .attr("stroke-width", 0.5);
+
+    let countryPaths = null;
+    let markersReady = false;
+
+    d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+      .then((data) => {
+        countryPaths = svg.selectAll(".gc-country")
+          .data(topojson.feature(data, data.objects.countries).features)
+          .enter().append("path")
+          .attr("class", "gc-globe-path--country")
+          .attr("fill", "#1ca3dd")
+          .attr("stroke", "rgba(255,255,255,0.65)")
+          .attr("stroke-width", 0.4);
+        // Raise markers above countries once countries are painted
+        markerLayer.raise();
+        markersReady = true;
       })
-    });
+      .catch(() => { /* decorative — fail silently */ });
 
-    const rotate = () => {
-      let dt = Date.now() - startTime;
-      projection.rotate([rotationSpeed * dt - 120, -15]);
-      markerProjection.rotate(projection.rotate());
-      svg.selectAll("path").attr("d", path);
-      svg
-        .selectAll(".location")
-        .attr("cx", function (d) {
-          return projection([d[1], d[0]])[0];
-        })
-        .attr("cy", function (d) {
-          return projection([d[1], d[0]])[1];
-        })
-        .attr("visibility", function (d) {
-          return d3.geoDistance(
-            [d[1], d[0]],
-            projection.invert([width / 2, height / 2])
-          ) >
-            Math.PI / 2
-            ? "hidden"
-            : "visible";
+    const markerLayer = svg.append("g").attr("class", "gc-globe-markers");
+    const markerNodes = markerLayer.selectAll(".gc-globe-marker")
+      .data(locations).enter()
+      .append("g").attr("class", "gc-globe-marker");
+
+    // Pulse halo
+    markerNodes.append("circle").attr("class", "gc-globe-marker__halo").attr("r", markerR + 4);
+    // White background disk so emoji shows on any globe color
+    markerNodes.append("circle").attr("r", markerR).attr("fill", "#fff").attr("stroke", "#dbeafe").attr("stroke-width", 1.2);
+    // Emoji flag — always renders
+    markerNodes.append("text")
+      .attr("class", "gc-globe-marker__emoji")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .attr("font-size", markerR * 1.35)
+      .text(d => d.flag);
+    // Country code label below the bubble
+    markerNodes.append("text")
+      .attr("class", "gc-globe-marker__code")
+      .attr("text-anchor", "middle")
+      .attr("y", markerR + 10)
+      .text(d => d.countryCode);
+
+    // ── Render ────────────────────────────────────────────────────────────────
+    const render = () => {
+      spherePath.attr("d", path({ type: "Sphere" }));
+      graticulePath.attr("d", path(graticule));
+      if (countryPaths) countryPaths.attr("d", path);
+      markerNodes
+        .attr("display", d => isVisible(d) ? null : "none")
+        .attr("transform", d => {
+          const [x, y] = projection([d.lon, d.lat]);
+          return `translate(${x},${y})`;
         });
+      if (markersReady) markerLayer.raise();
     };
 
+    // ── Auto-rotation ─────────────────────────────────────────────────────────
+    let autoRotate = true;
     let startTime = Date.now();
-    d3.timer(rotate);
+    let baseRotation = -25;
+
+    const timer = d3.timer(() => {
+      if (!autoRotate) return;
+      const elapsed = Date.now() - startTime;
+      projection.rotate([baseRotation + AUTO_SPEED * elapsed, TILT]);
+      render();
+    });
+
+    // ── Drag to spin ──────────────────────────────────────────────────────────
+    let dragStart = null;
+    let rotAtDragStart = null;
+
+    const drag = d3.drag()
+      .on("start", (event) => {
+        autoRotate = false;
+        timer.stop();
+        dragStart = [event.x, event.y];
+        rotAtDragStart = projection.rotate().slice();
+      })
+      .on("drag", (event) => {
+        const dx = event.x - dragStart[0];
+        const dy = event.y - dragStart[1];
+        const sensitivity = 0.3;
+        projection.rotate([
+          rotAtDragStart[0] + dx * sensitivity,
+          Math.max(-60, Math.min(60, rotAtDragStart[1] - dy * sensitivity)),
+        ]);
+        render();
+      })
+      .on("end", () => {
+        // Resume auto-rotation smoothly from current position
+        baseRotation = projection.rotate()[0];
+        startTime = Date.now();
+        autoRotate = true;
+        timer.restart(() => {
+          if (!autoRotate) return;
+          const elapsed = Date.now() - startTime;
+          projection.rotate([baseRotation + AUTO_SPEED * elapsed, TILT]);
+          render();
+        });
+      });
+
+    svg.call(drag).style("cursor", "grab");
+
+    render(); // initial paint
 
     return () => {
-      svg.selectAll("*").remove();
+      timer.stop();
+      d3.select("#earth").selectAll("svg").remove();
     };
   }, []);
 
@@ -402,541 +527,432 @@ const Hero = () => {
       <div className="border-bottom">
         <div className="w-lg-100 text-center mx-lg-auto">
 
+          {/* ── Hero ─────────────────────────────────────────────────── */}
+          <div className="gc-hero">
+            {/* Left: copy + search */}
+            <div className="gc-hero__left">
+              <h1 className="gc-hero__title">
+                Global shipments to<br />
+                <span className="gc-hero__title-accent">GEORGIA</span>
+              </h1>
 
-          <div className='mt-xl-6 mt-xxl-6 mt-md-0 position-relative'>
-            <h1 style={{ fontSize: "calc(100% + 2vw + 1vh)", color: "rgb(76, 78, 85)" }} className="text-start">Global shipments to
-              <br />GEORGIA</h1>
-            {/* <p className="lead">All your freight services in one place</p> */}
-            {/* <div className="btn-group" role="group" aria-label="Basic example">
-              <Button
-                variant={active === 'tracking' ? "secondary" : 'outline-secondary'}
-                className="rounded-0 border-bottom-0 rounded-top"
-                onClick={() => setActive('tracking')}
-                aria-controls="tracking-colapse"
-                aria-expanded={active === 'tracking'}
-              >
-                Tracking
-              </Button>
-              <Button
-                variant={active === 'booking' ? "secondary" : 'outline-secondary'}
-                className="rounded-0 border-bottom-0 rounded-top"
-                onClick={() => setActive('booking')}
-                aria-controls="booking-colapse"
-                aria-expanded={active === 'booking'}
-              >
-                Booking
-              </Button>
-            </div> */}
+              <p className="gc-hero__sub">Fast, reliable cargo delivery from Europe &amp; beyond.</p>
 
-            <Collapse in={hash === '#tracking' || (match.params.tracking && !match.params.tracking.match(/^[a-z]+$/))}>
-              <div id="tracking-colapse" className="pt-4 float-start">
-                <PublicTrackingModal />
-              </div>
-            </Collapse>
-
-            <Collapse in={hash === '#booking' || hash === ''} className="mb-4 pt-4 float-start">
-              <div id="booking-colapse">
-                {/* <Button className="btn btn-secondary me-2  btn-lg mb-4 mx-auto"
-                  onClick={redirectToBooking}
-                >
-                  <i className="bi bi-file-earmark-plus"></i> Book now
-                </Button> */}
-                {auth?.isLoggedIn === true && (auth?.sourceCountry === '' || auth?.sourceCountry === 'null') && (
-                  <small className='text-danger d-block w-100 text-start'>Please <Link to={"/dashboard/address"} className="text-danger"><span className='fw-bold'>enter</span></Link> your address in dasboard.</small>
-                )}
-
-                <div className="input-group mb-3" style={{ border: "4px solid #1CA3DD" }}>
-                  <label className="input-group-text p-1 ps-2" for="">
-                    <i className=" text-info bi bi-geo-alt-fill"></i>
-                  </label>
-                  <select disabled={auth.isLoggedIn === true && auth?.accountType === 'CLIENT'} value={sourceCountry}
-                    onChange={(e) => setSourceCountry(e.target.value)}
-                    className="form-select border-start-0" aria-label="Filter select">
-                    {Object.getOwnPropertyNames(Steps).map((st, i) => (
-                      <option value={st.toUpperCase()}
-                      >{windowWidth < 400 ? countryListAllIsoData.find(x => x.value === st.toUpperCase()).value : countryListAllIsoData.find(x => x.value === st.toUpperCase()).label}</option>
-                    ))}
-                  </select>
-
-                  <label className="input-group-text p-1 ps-2" for="">
-                    <i className=" text-info bi bi-geo-alt-fill"></i>
-                  </label>
-                  <select disabled={allRoutesData === ''}
-                    value={destinationCountry}
-                    onChange={(e) => setDestinationCountry(e.target.value)}
-                    className="form-select border-start-0" aria-label="Filter select">
-                    {allRoutesData === '' && (
-                      <option>
-                        Loading...
-                      </option>
-                    )}
-                    {allRoutesData && allRoutesData.map((rt) => (
-                      <option value={rt.value}
-                      >{windowWidth < 400 ? rt.value : rt.label}</option>
-                    ))}
-                  </select>
-
-                  <button className="form-control rounded-0 border-0 btn btn-secondary btn-lg" type="button" id="button-addon2"
-                    onClick={redirectToBooking}
-                  >Book Now</button>
+              {/* Tracking */}
+              <Collapse in={hash === '#tracking' || (match.params.tracking && !match.params.tracking.match(/^[a-z]+$/))}>
+                <div id="tracking-colapse" className="mb-4">
+                  <PublicTrackingModal />
                 </div>
-              </div>
-            </Collapse>
-            <div className="clearfix mb-xl-10 mb-xxl-10 mb-lg-10 mb-md-4"></div>
-            <div className="row container d-flex text-start">
-              <div className="template-demo ps-0 mt-0">
-                <button className="btn btn-outline-dark border-0 btn-icon-text p-1 bg-white my-2"
-                  style={{ color: "rgb(76, 78, 85)" }}>
-                  <i className="bi bi-apple btn-icon-prepend"
-                    style={{ fontSize: "23px", marginRight: "6px" }}></i>
-                  <span className="text-start d-inline-block" style={{ lineHeight: "1" }}>
-                    <small style={{ fontSize: "12px" }} className="font-weight-sm d-block text-muted">Get it on the</small>
-                    <span className='fw-bold'>App Store</span>
+              </Collapse>
+
+              {/* Booking bar */}
+              <Collapse in={hash === '#booking' || hash === ''}>
+                <div id="booking-colapse" className="mb-4">
+                  {auth?.isLoggedIn === true && (auth?.sourceCountry === '' || auth?.sourceCountry === 'null') && (
+                    <small className='text-danger d-block w-100 text-start mb-2'>
+                      Please <Link to={"/dashboard/address"} className="text-danger fw-bold">enter</Link> your address in dashboard.
+                    </small>
+                  )}
+                  <div className="gc-booking-bar">
+                    <div className="gc-booking-bar__field">
+                      <span className="gc-booking-bar__icon"><i className="bi bi-geo-alt-fill"></i></span>
+                      <div className="gc-booking-bar__label">From</div>
+                      <select
+                        disabled={auth.isLoggedIn === true && auth?.accountType === 'CLIENT'}
+                        value={sourceCountry}
+                        onChange={(e) => setSourceCountry(e.target.value)}
+                        className="gc-booking-bar__select"
+                        aria-label="Source country"
+                      >
+                        {Object.getOwnPropertyNames(Steps).map((st) => (
+                          <option key={st} value={st.toUpperCase()}>
+                            {windowWidth < 400
+                              ? countryListAllIsoData.find(x => x.value === st.toUpperCase()).value
+                              : countryListAllIsoData.find(x => x.value === st.toUpperCase()).label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="gc-booking-bar__divider"><i className="bi bi-arrow-right"></i></div>
+
+                    <div className="gc-booking-bar__field">
+                      <span className="gc-booking-bar__icon gc-booking-bar__icon--dest"><i className="bi bi-geo-fill"></i></span>
+                      <div className="gc-booking-bar__label">To</div>
+                      <select
+                        disabled={allRoutesData === ''}
+                        value={destinationCountry}
+                        onChange={(e) => setDestinationCountry(e.target.value)}
+                        className="gc-booking-bar__select"
+                        aria-label="Destination country"
+                      >
+                        {allRoutesData === '' && <option>Loading...</option>}
+                        {allRoutesData && allRoutesData.map((rt) => (
+                          <option key={rt.value} value={rt.value}>
+                            {windowWidth < 400 ? rt.value : rt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <button className="gc-booking-bar__btn" type="button" onClick={redirectToBooking}>
+                      <i className="bi bi-search me-2"></i>Book Now
+                    </button>
+                  </div>
+                </div>
+              </Collapse>
+
+              {/* App store buttons */}
+              <div className="gc-appstore-btns">
+                <button className="gc-appstore-btn">
+                  <svg className="gc-appstore-btn__icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  <span className="gc-appstore-btn__text">
+                    <small>Download on the</small>
+                    <strong>App Store</strong>
                   </span>
                 </button>
-                &nbsp;
-                <button className="btn btn-outline-dark border-0 btn-icon-text p-1 bg-white"
-                  style={{ color: "rgb(76, 78, 85)" }}>
-                  <i className="bi bi-google-play btn-icon-prepend"
-                    style={{ fontSize: "23px", marginRight: "6px" }}></i>
-                  <span className="text-start d-inline-block" style={{ lineHeight: "1" }}>
-                    <small style={{ fontSize: "12px" }} className="font-weight-light d-block text-muted">Get it on the</small>
-
-                    <span className='fw-bold'>Google Play</span>
+                <button className="gc-appstore-btn">
+                  <svg className="gc-appstore-btn__icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3.18 23.76c.3.17.65.19.97.08l.1-.06 11.05-6.37-2.38-2.39-9.74 8.74zM.64 1.67C.24 2.03 0 2.58 0 3.28v17.45c0 .7.24 1.25.64 1.6l.08.08 9.77-9.77v-.22L.72 1.59l-.08.08zM20.9 10.51l-2.81-1.62-2.65 2.65 2.65 2.65 2.84-1.64c.81-.47.81-1.23-.03-1.04zM4.15.24L15.2 6.61 12.82 9 3.08.26l.07-.02z"/>
+                  </svg>
+                  <span className="gc-appstore-btn__text">
+                    <small>Get it on</small>
+                    <strong>Google Play</strong>
                   </span>
                 </button>
               </div>
-
             </div>
 
-            <div className="d-block float-start mt-4">
-              {/* <h3 className="float-start" style={{ lineHeight: "1.9", color: "rgb(76, 78, 85)" }} >Get in on</h3>
-              &nbsp;
-              <button style={{ color: "rgb(76, 78, 85)" }} className="btn btn-white app-button">
-                <i className="bi bi-apple"></i>&nbsp; <span className="ml-2">Apple store</span>
-              </button>
-
-              <button style={{ color: "rgb(76, 78, 85)" }} className="btn btn-white app-button ms-lg-2 ms-md-2">
-                <i className="bi bi-google-play"></i>&nbsp;<span className="ml-2">Google store</span>
-              </button> */}
-              <div className='float-start'>
-                {/*<a href="https://www.facebook.com/georgiancargoworld/" title="Georgian Cargo facebook" target="_blank" style={{ fontSize: "20px", color: "rgb(76, 78, 85)" }}>
-                  <i className="bi bi-facebook"></i>
-                </a>
-                <a href="" target="_blank" title="Georgian Cargo twitter" style={{ fontSize: "20px", color: "rgb(76, 78, 85)" }}>
-                  <i className="fab fa-twitter ms-2"></i>
-                </a>
-                <a href="" target="_blank" title="Georgian Cargo instagram" style={{ fontSize: "20px", color: "rgb(76, 78, 85)" }}>
-                  <i className="fab fa-instagram ms-2"></i>
-                </a>
-                <a href="" target="_blank" title="Georgian Cargo linkedin" style={{ fontSize: "20px", color: "rgb(76, 78, 85)" }}>
-                  <i className="bi bi-linkedin ms-2"></i>
-                </a>
-                <a href="" target="_blank" title="Georgian Cargo youtube" style={{ fontSize: "20px", color: "rgb(76, 78, 85)" }}>
-                  <i className="fab fa-youtube ms-2"></i>
-                </a>*/}
-              </div>
-
+            {/* Right: globe (desktop/tablet only) */}
+            <div className="gc-hero__right d-none d-md-flex">
+              <div id="earth" className="gc-hero__globe" aria-hidden="true"></div>
             </div>
-            <div className="d-none d-lg-block d-md-block" id="earth" style={{ height: "300px", position: "absolute", right: "calc(10% - 10vw)", top: "-20px", zIndex: "-1" }}></div>
-
           </div>
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <figure className="figure w-85">
-            <figcaption className="figure-caption row">
-              <div className="col-12 col-sm-12 col-md-12 col-lg-5 col-xxl-5 col-xl-5 text-start">
-                <h2 className="card-title text-md-center text-center text-lg-start text-xl-start text-xxl-start">Personal Dashboard</h2>
-                <p className="card-text h4 text-md-center text-center text-lg-start text-xl-start text-xxl-start" style={{ lineHeight: "1.6" }}>See and manage all your shipments in one place on desktop  and mobile</p>
-              </div>
-              <div className="col-12 col-sm-12 col-md-12 col-lg-7 col-xxl-7 col-xl-7">
-                <img src="/responsive-example.png" className='img-fluid' />
-              </div>
-            </figcaption>
+          {/* ── /Hero ────────────────────────────────────────────────── */}
 
-          </figure>
+          <section className="gc-dashboard-highlight" aria-labelledby="gc-dashboard-highlight-title">
+            <div className="gc-dashboard-highlight__copy">
+              <p className="gc-dashboard-highlight__eyebrow">Customer Portal</p>
+              <h2 id="gc-dashboard-highlight-title" className="gc-dashboard-highlight__title">
+                Personal Dashboard
+              </h2>
+              <p className="gc-dashboard-highlight__description">
+                See and manage all your shipments in one place on desktop and mobile.
+              </p>
+              <ul className="gc-dashboard-highlight__list">
+                <li>Track every parcel from booking to delivery</li>
+                <li>Check shipment history and live statuses</li>
+                <li>Manage bookings and profile details faster</li>
+              </ul>
+              <div className="gc-dashboard-highlight__actions">
+                <Link to="/home/register" className="gc-dashboard-highlight__btn gc-dashboard-highlight__btn--primary">
+                  Create account
+                </Link>
+                <Link to="/home/login" className="gc-dashboard-highlight__btn gc-dashboard-highlight__btn--secondary">
+                  Sign in
+                </Link>
+              </div>
+            </div>
+
+            <div className="gc-dashboard-highlight__media">
+              <div className="hero-banner-wrapper">
+                <picture>
+                  <source srcSet="/responsive-example.webp" type="image/webp" />
+                  <img
+                    src="/responsive-example.png"
+                    className="img-fluid gc-dashboard-highlight__image"
+                    fetchpriority="high"
+                    width="760"
+                    height="480"
+                    alt="Personal Dashboard on laptop and mobile"
+                  />
+                </picture>
+              </div>
+            </div>
+          </section>
 
 
           <hr />
 
-          <figure className="figure">
-            <figcaption className="figure-caption">
-              <h2 className="card-title">Discount Parcel Delivery</h2>
-              <p className="card-text h5" style={{ lineHeight: "1.6" }}>Sending parcels and pallets online should be easy.<br />So we've made our booking process fast and simple to use</p>
-            </figcaption>
-            <div className="container mt-6">
-              <div className="row">
-                <div className="col-12 col-md-4 col-sm-12">
-                  <figure className="figure">
-                    <img src="/delivery-courier-truck.png" className='img-fluid w-50' />
-
-                    <figcaption className="figure-caption">
-                      <h4 className="card-title">Enter Destination</h4>
-                      <p className="card-text h6" style={{ lineHeight: "1.6" }}>We deliver parcels to your destination
-                        to Georgia or elsewhere
-                        guiding you all the way</p>
-                    </figcaption>
-                  </figure>
-                </div>
-                <div className="col-12 col-md-4 col-sm-12">
-                  <figure className="figure">
-                    <img width="93%" src="/pile-packing-boxes.png" className='img-fluid w-50' />
-
-                    <figcaption className="figure-caption">
-                      <h4 className="card-title">Great Service</h4>
-                      <p className="card-text h6" style={{ lineHeight: "1.6" }}>
-                        Services. Make your choise based on price, service or speed of delivery.
-                      </p>
-                    </figcaption>
-                  </figure>
-                </div>
-                <div className="col-12 col-md-4 col-sm-12">
-                  <figure className="figure">
-                    <img src="/man-working-laptop.png" className='img-fluid w-50' />
-
-                    <figcaption className="figure-caption">
-                      <h4 className="card-title">Book Online</h4>
-                      <p className="card-text h6" style={{ lineHeight: "1.6" }}>
-                        Book your delivery with us and we'll do the rest. you can pay by any credit card with Stripe.
-                      </p>
-                    </figcaption>
-                  </figure>
-                </div>
-              </div>
+          <section className="gc-delivery-section" aria-labelledby="gc-delivery-title">
+            <div className="gc-delivery-section__head">
+              <p className="gc-delivery-section__eyebrow">How It Works</p>
+              <h2 id="gc-delivery-title" className="gc-delivery-section__title">Discount Parcel Delivery</h2>
+              <p className="gc-delivery-section__subtitle">
+                Sending parcels and pallets online should be easy. We made the booking process fast, clear, and simple.
+              </p>
             </div>
-          </figure>
+
+            <div className="gc-delivery-cards">
+
+              {/* Step 1 */}
+              <article className="gc-delivery-card">
+                <div className="gc-delivery-card__icon-wrap gc-delivery-card__icon-wrap--blue">
+                  <span className="gc-delivery-card__step">01</span>
+                  <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" className="gc-delivery-card__icon">
+                    <circle cx="24" cy="22" r="9" stroke="currentColor" strokeWidth="2.5" fill="none"/>
+                    <path d="M24 4C15.163 4 8 11.163 8 20c0 12.418 14.244 23.164 15.03 23.736a1.5 1.5 0 0 0 1.94 0C25.756 43.164 40 32.418 40 20c0-8.837-7.163-16-16-16z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" fill="none"/>
+                    <circle cx="24" cy="22" r="4" fill="currentColor" opacity="0.25"/>
+                  </svg>
+                </div>
+                <div className="gc-delivery-card__body">
+                  <h4 className="gc-delivery-card__title">Enter Destination</h4>
+                  <p className="gc-delivery-card__text">
+                    Choose where your parcel needs to go and we guide you through every step to Georgia or elsewhere.
+                  </p>
+                </div>
+              </article>
+
+              <div className="gc-delivery-connector" aria-hidden="true">
+                <svg viewBox="0 0 40 16" fill="none">
+                  <path d="M0 8 H32 M28 4 L36 8 L28 12" stroke="#c7d9ee" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+
+              {/* Step 2 */}
+              <article className="gc-delivery-card">
+                <div className="gc-delivery-card__icon-wrap gc-delivery-card__icon-wrap--teal">
+                  <span className="gc-delivery-card__step">02</span>
+                  <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" className="gc-delivery-card__icon">
+                    <path d="M8 14h32M8 22h20M8 30h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                    <rect x="6" y="8" width="36" height="32" rx="4" stroke="currentColor" strokeWidth="2.5"/>
+                    <circle cx="36" cy="34" r="7" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="2.5"/>
+                    <path d="M33 34l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="gc-delivery-card__body">
+                  <h4 className="gc-delivery-card__title">Great Service</h4>
+                  <p className="gc-delivery-card__text">
+                    Compare services by price, delivery speed, and convenience to choose the best option for your shipment.
+                  </p>
+                </div>
+              </article>
+
+              <div className="gc-delivery-connector" aria-hidden="true">
+                <svg viewBox="0 0 40 16" fill="none">
+                  <path d="M0 8 H32 M28 4 L36 8 L28 12" stroke="#c7d9ee" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+
+              {/* Step 3 */}
+              <article className="gc-delivery-card">
+                <div className="gc-delivery-card__icon-wrap gc-delivery-card__icon-wrap--violet">
+                  <span className="gc-delivery-card__step">03</span>
+                  <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" className="gc-delivery-card__icon">
+                    <rect x="6" y="14" width="36" height="24" rx="4" stroke="currentColor" strokeWidth="2.5"/>
+                    <path d="M6 22h36" stroke="currentColor" strokeWidth="2.5"/>
+                    <rect x="12" y="28" width="8" height="4" rx="1" fill="currentColor" opacity="0.3"/>
+                    <path d="M28 30h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M16 9 L24 14 L32 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="gc-delivery-card__body">
+                  <h4 className="gc-delivery-card__title">Book Online</h4>
+                  <p className="gc-delivery-card__text">
+                    Complete your booking in minutes and pay securely with your card through Stripe.
+                  </p>
+                </div>
+              </article>
+
+            </div>
+          </section>
 
           <hr className='mt-8 mb-8' />
 
-          <figure className="figure">
-            <figcaption className="figure-caption">
-              <h2 className="card-title mb-4">We Make Difference</h2>
-              <p className="card-text h5 w-75 mx-auto" style={{ lineHeight: "1.6" }}>We observe about customer service, so give us a call if you need any help. all our staff are trained and knowledgeable about all the services we sell.</p>
-            </figcaption>
-            <div className='container w-75 mb-2'>
-              <div className='row'>
-                <div className="col-12 col-sm-12 col-md-6">
-                  <ul className='text-start'>
-                    <li className='mt-8'><i style={{ fontSize: "25px" }} className="text-success bi bi-check-lg"></i> &nbsp;&nbsp; Great Prices</li>
-                    <li className='mt-2'><i style={{ fontSize: "25px" }} className="text-success bi bi-check-lg"></i>&nbsp;&nbsp;Excellent Customer Service</li>
-                    <li className='mt-2'><i style={{ fontSize: "25px" }} className="text-success bi bi-check-lg"></i>&nbsp;&nbsp;Large Range Of Courier Services</li>
-                    <li className='mt-2'><i style={{ fontSize: "25px" }} className="text-success bi bi-check-lg"></i>&nbsp;&nbsp;Proactive Tracking Notifications</li>
-                    <li className='mt-2'><i style={{ fontSize: "25px" }} className="text-success bi bi-check-lg"></i>&nbsp;&nbsp;Telephone, Email & Live Chat Support</li>
-                  </ul>
+          <section className="gc-diff" aria-labelledby="gc-diff-title">
+            {/* Left column — copy + stats */}
+            <div className="gc-diff__left">
+              <p className="gc-diff__eyebrow">Why Customers Choose Us</p>
+              <h2 id="gc-diff-title" className="gc-diff__title">We Make a<br />Difference</h2>
+              <p className="gc-diff__subtitle">
+                Customer service is our focus. Our team is trained across every service we offer — reach us by phone, email, or live chat any time.
+              </p>
+
+              <div className="gc-diff__stats">
+                <div className="gc-diff__stat">
+                  <span className="gc-diff__stat-value">15+</span>
+                  <span className="gc-diff__stat-label">Years of experience</span>
                 </div>
-                <div className="col-12 col-sm-12 col-md-6">
-                  <img src="/man-working-laptop.png" className='img-fluid w-75' />
+                <div className="gc-diff__stat">
+                  <span className="gc-diff__stat-value">20K+</span>
+                  <span className="gc-diff__stat-label">Parcels delivered</span>
+                </div>
+                <div className="gc-diff__stat">
+                  <span className="gc-diff__stat-value">4</span>
+                  <span className="gc-diff__stat-label">Countries served</span>
                 </div>
               </div>
             </div>
-          </figure>
 
-          <hr className='mt-8 mb-8' />
-
-          <figure className="figure w-100">
-            <figcaption className="figure-caption mb-4">
-              <h2 className="card-title mb-4 h4 text-primary" style={{ letterSpacing: ".3rem", textTransform: "uppercase" }}>Popular Shipments</h2>
-              <p className="card-text h1 w-100 mx-auto" style={{ lineHeight: ".2" }}>What others have sent</p>
-            </figcaption>
-            <div className='container w-100 mb-6'>
-              <div className='row'>
-                <div className="col-12 col-sm-12 col-md-12">
-
-                  <ul className="nav nav-tabs nav-fill mb-3" id="myTab" role="tablist">
-                    <li className="nav-item" role="presentation">
-                      <button className="nav-link active fw-bold" id="hoit-tab" data-bs-toggle="tab" data-bs-target="#hoit" type="button" role="tab" aria-controls="hoit" aria-selected="true">Household Items</button>
-                    </li>
-                    <li className="nav-item" role="presentation">
-                      <button className="nav-link fw-bold" id="spoequ-tab" data-bs-toggle="tab" data-bs-target="#spoequ" type="button" role="tab" aria-controls="spoequ" aria-selected="false">Sports Equipments</button>
-                    </li>
-                    <li className="nav-item" role="presentation">
-                      <button className="nav-link fw-bold" id="furni-tab" data-bs-toggle="tab" data-bs-target="#furni" type="button" role="tab" aria-controls="furni" aria-selected="false">Furniture</button>
-                    </li>
-                    <li className="nav-item" role="presentation">
-                      <button className="nav-link fw-bold" id="elect-tab" data-bs-toggle="tab" data-bs-target="#elect" type="button" role="tab" aria-controls="elect" aria-selected="false">Electronics</button>
-                    </li>
-                  </ul>
-                  <div className="tab-content" id="myTabContent">
-                    <div className="tab-pane fade show active" id="hoit" role="tabpanel" aria-labelledby="hoit-tab">
-                      <div className="container">
-                        <div className='row g-2'>
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-tv text-primary"></i>
-
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Television</p>
-                                      <span className="fw-bold text-muted">United Kingdom</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£40.16</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-door-closed text-primary"></i>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Smeg Fridge</p>
-                                      <span className="fw-bold text-muted">Ireland</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£187.22</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-guitar text-primary"></i>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Guitar</p>
-                                      <span className="fw-bold text-muted">United Kingdom</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£55.55</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="tab-pane fade" id="spoequ" role="tabpanel" aria-labelledby="spoequ-tab">
-                      <div className="container">
-                        <div className='row g-2'>
-                          <div className="col-12 col-lg-6 col-md-12 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-
-                                      <svg style={{ fontSize: "35px" }} xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" className="bi bi-scooter text-primary" viewBox="0 0 16 16">
-                                        <path fillRule="evenodd" d="M9 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-.39l1.4 7a2.5 2.5 0 1 1-.98.195l-.189-.938-2.43 3.527A.5.5 0 0 1 9.5 13H4.95a2.5 2.5 0 1 1 0-1h4.287l2.831-4.11L11.09 3H9.5a.5.5 0 0 1-.5-.5ZM3.915 12a1.5 1.5 0 1 0 0 1H2.5a.5.5 0 0 1 0-1h1.415Zm8.817-.789A1.499 1.499 0 0 0 13.5 14a1.5 1.5 0 0 0 .213-2.985l.277 1.387a.5.5 0 0 1-.98.196l-.278-1.387Z" />
-                                      </svg>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Electric Scooter</p>
-                                      <span className="fw-bold text-muted">United Kingdom</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£52.98</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-bicycle text-primary"></i>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Bike</p>
-                                      <span className="fw-bold text-muted">Ireland</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£143.96</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-running text-primary"></i>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Treadmill</p>
-                                      <span className="fw-bold text-muted">United Kingdom</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£55.55</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="tab-pane fade" id="furni" role="tabpanel" aria-labelledby="furni-tab">
-                      <div className="container">
-                        <div className='row g-2'>
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-chair text-primary"></i>
-
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Small Furniture</p>
-                                      <span className="fw-bold text-muted">United Kingdom</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£31.62</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-record-vinyl text-primary"></i>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Table</p>
-                                      <span className="fw-bold text-muted">Ireland</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£399.14</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-desktop text-primary"></i>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Desktop Monitor</p>
-                                      <span className="fw-bold text-muted">United Kingdom</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£5.85</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="tab-pane fade" id="elect" role="tabpanel" aria-labelledby="elect-tab">
-                      <div className="container">
-                        <div className='row g-2'>
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" className="text-primary bi bi-projector" viewBox="0 0 16 16">
-                                        <path d="M14 7.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM2.5 6a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4Zm0 2a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4Z" />
-                                        <path d="M0 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2 1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1H5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1 2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H2Z" />
-                                      </svg>
-
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Projector</p>
-                                      <span className="fw-bold text-muted">United Kingdom</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£46.15</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-laptop text-primary"></i>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Laptop</p>
-                                      <span className="fw-bold text-muted">Ireland</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£35.89</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-12 col-lg-6 col-xl-4 col-xxl-4">
-                            <div className="card">
-                              <div className="card-body p-2">
-                                <div className="card-text">
-                                  <div className="row">
-                                    <div className="col-3 pt-2">
-                                      <i style={{ fontSize: "35px" }} className="fas fa-mobile-alt text-primary"></i>
-                                    </div>
-                                    <div className="col-9 text-start">
-                                      <p className='h3'>Mobile Phone</p>
-                                      <span className="fw-bold text-muted">United Kingdom</span> to <span className="fw-bold text-muted">Georgia</span>
-                                      <br />
-                                      <span className="mt-1 h3 fw-bold text-primary">£23.92</span><small className='text-muted'> + VAT</small>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+            {/* Right column — feature cards */}
+            <div className="gc-diff__right">
+              {[
+                {
+                  color: "blue",
+                  title: "Great Prices",
+                  desc: "Competitive rates on every route — no hidden fees, ever.",
+                  icon: (
+                    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                      <path d="M20 8v24M14 14h9a3 3 0 0 1 0 6h-6a3 3 0 0 0 0 6h10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+                    </svg>
+                  ),
+                },
+                {
+                  color: "teal",
+                  title: "Excellent Customer Service",
+                  desc: "Friendly support staff available whenever you need help.",
+                  icon: (
+                    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                      <path d="M10 22v-4a10 10 0 1 1 20 0v4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+                      <rect x="8" y="21" width="5" height="8" rx="2.5" stroke="currentColor" strokeWidth="2.2"/>
+                      <rect x="27" y="21" width="5" height="8" rx="2.5" stroke="currentColor" strokeWidth="2.2"/>
+                      <path d="M32 29v2a4 4 0 0 1-4 4h-4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+                    </svg>
+                  ),
+                },
+                {
+                  color: "violet",
+                  title: "Wide Range of Services",
+                  desc: "Parcels, pallets, containers — we cover every shipment type.",
+                  icon: (
+                    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                      <rect x="6" y="14" width="28" height="18" rx="3" stroke="currentColor" strokeWidth="2.2"/>
+                      <path d="M13 14V11a7 7 0 0 1 14 0v3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+                      <circle cx="20" cy="23" r="3" stroke="currentColor" strokeWidth="2.2"/>
+                    </svg>
+                  ),
+                },
+                {
+                  color: "amber",
+                  title: "Live Tracking",
+                  desc: "Proactive notifications so you always know where your shipment is.",
+                  icon: (
+                    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                      <circle cx="20" cy="17" r="6" stroke="currentColor" strokeWidth="2.2"/>
+                      <path d="M20 11V7M20 27v-4M26 17h4M10 17h4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+                      <path d="M20 23c0 4-6 10-6 10h12s-6-6-6-10z" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round"/>
+                    </svg>
+                  ),
+                },
+                {
+                  color: "rose",
+                  title: "Multi-Channel Support",
+                  desc: "Telephone, email, and live chat — choose whatever suits you.",
+                  icon: (
+                    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                      <path d="M8 12h24a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V14a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="2.2"/>
+                      <path d="M6 14l14 9 14-9" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+                    </svg>
+                  ),
+                },
+              ].map(({ color, title, desc, icon }) => (
+                <div key={title} className={`gc-diff__card gc-diff__card--${color}`}>
+                  <div className="gc-diff__card-icon">{icon}</div>
+                  <div className="gc-diff__card-body">
+                    <p className="gc-diff__card-title">{title}</p>
+                    <p className="gc-diff__card-desc">{desc}</p>
                   </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
+          <hr className='mt-8 mb-8' />
+
+          <section className="gc-popular-shipments" aria-labelledby="gc-popular-shipments-title">
+            <div className="gc-popular-shipments__head">
+              <p className="gc-popular-shipments__eyebrow">Trending</p>
+              <h2 id="gc-popular-shipments-title" className="gc-popular-shipments__title">Popular Shipments</h2>
+              <p className="gc-popular-shipments__subtitle">Example prices of what others have sent with us</p>
+            </div>
+
+            <div className="gc-popular-shipments__body">
+              {/* Tab pills */}
+              <ul className="gc-popular-shipments__tabs nav nav-pills" id="myTab" role="tablist">
+                {[
+                  { id: "hoit", label: "Household Items", icon: "bi-house-door" },
+                  { id: "spoequ", label: "Sports Equipment", icon: "bi-bicycle" },
+                  { id: "furni", label: "Furniture", icon: "bi-lamp" },
+                  { id: "elect", label: "Electronics", icon: "bi-cpu" },
+                ].map(({ id, label, icon }, i) => (
+                  <li className="nav-item" key={id} role="presentation">
+                    <button
+                      className={`gc-popular-shipments__tab-btn${i === 0 ? " active" : ""}`}
+                      id={`${id}-tab`}
+                      data-bs-toggle="tab"
+                      data-bs-target={`#${id}`}
+                      type="button"
+                      role="tab"
+                      aria-controls={id}
+                      aria-selected={i === 0}
+                    >
+                      <i className={`bi ${icon}`} aria-hidden="true"></i>
+                      <span>{label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Tab panels */}
+              <div className="tab-content gc-popular-shipments__panels" id="myTabContent">
+
+                {/* Household */}
+                <div className="tab-pane fade show active" id="hoit" role="tabpanel" aria-labelledby="hoit-tab">
+                  <div className="gc-shipment-grid">
+                    {[
+                      { icon: "fas fa-tv", name: "Television", from: "United Kingdom", price: "£40.16" },
+                      { icon: "fas fa-door-closed", name: "Smeg Fridge", from: "Ireland", price: "£187.22" },
+                      { icon: "fas fa-guitar", name: "Guitar", from: "United Kingdom", price: "£55.55" },
+                    ].map((item) => (
+                      <ShipmentCard key={item.name} {...item} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sports */}
+                <div className="tab-pane fade" id="spoequ" role="tabpanel" aria-labelledby="spoequ-tab">
+                  <div className="gc-shipment-grid">
+                    {[
+                      { icon: "fas fa-bicycle", name: "Electric Scooter", from: "United Kingdom", price: "£52.98" },
+                      { icon: "fas fa-bicycle", name: "Bike", from: "Ireland", price: "£143.96" },
+                      { icon: "fas fa-running", name: "Treadmill", from: "United Kingdom", price: "£55.55" },
+                    ].map((item) => (
+                      <ShipmentCard key={item.name} {...item} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Furniture */}
+                <div className="tab-pane fade" id="furni" role="tabpanel" aria-labelledby="furni-tab">
+                  <div className="gc-shipment-grid">
+                    {[
+                      { icon: "fas fa-chair", name: "Small Furniture", from: "United Kingdom", price: "£31.62" },
+                      { icon: "fas fa-couch", name: "Table", from: "Ireland", price: "£399.14" },
+                      { icon: "fas fa-desktop", name: "Desktop Monitor", from: "United Kingdom", price: "£5.85" },
+                    ].map((item) => (
+                      <ShipmentCard key={item.name} {...item} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Electronics */}
+                <div className="tab-pane fade" id="elect" role="tabpanel" aria-labelledby="elect-tab">
+                  <div className="gc-shipment-grid">
+                    {[
+                      { icon: "fas fa-tv", name: "Projector", from: "United Kingdom", price: "£46.15" },
+                      { icon: "fas fa-laptop", name: "Laptop", from: "Ireland", price: "£35.89" },
+                      { icon: "fas fa-mobile-alt", name: "Mobile Phone", from: "United Kingdom", price: "£23.92" },
+                    ].map((item) => (
+                      <ShipmentCard key={item.name} {...item} />
+                    ))}
+                  </div>
                 </div>
 
               </div>
             </div>
-          </figure>
+          </section>
           <hr className='mt-8 mb-8' />
           {allRoutesData && (
             <>
@@ -1439,236 +1455,165 @@ const Features = () => {
   );
 };
 const Testimonials = () => {
-  const style = {
-    height: "200px",
-    maxHeight: "200px",
-    overflowY: "scroll",
-  };
-  const Testimonial = ({ content, name, src }) => (
-    <div className="p-3">
-      <div className="card h-100">
-        <div className="card-body">
-          <ul className="list-inline text-warning">
-            <li className="list-inline-item mx-0">
-              <i className="fas fa-star" />
-            </li>
-            <li className="list-inline-item mx-0">
-              <i className="fas fa-star" />
-            </li>
-            <li className="list-inline-item mx-0">
-              <i className="fas fa-star" />
-            </li>
-            <li className="list-inline-item mx-0">
-              <i className="fas fa-star" />
-            </li>
-            <li className="list-inline-item mx-0">
-              <i className="fas fa-star" />
-            </li>
-          </ul>
-          <div className="mb-auto" style={style}>
-            <p className="text-dark mb-0">{content}</p>
-          </div>
-        </div>
+  const sliderRef = React.useRef(null);
 
-        <div className="card-footer border-0 bg-transparent pt-0 px-5 pb-5">
-          <div className="media align-items-center">
-            <div className="avatar avatar-circle me-3">
-              <img className="avatar-img" src={src} alt="Description" />
-            </div>
-            <div className="media-body">
-              <h4 className="mb-0">{name}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const slickSettings = {
+    dots: true,
+    infinite: true,
+    autoplay: true,
+    autoplaySpeed: 4500,
+    speed: 550,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    arrows: false,          // we render our own arrows — no edge-clipping issues
+    pauseOnHover: true,
+    swipeToSlide: true,
+    appendDots: dots => <ul className="gc-t-dots">{dots}</ul>,
+    responsive: [
+      { breakpoint: 992, settings: { slidesToShow: 2 } },
+      { breakpoint: 640, settings: { slidesToShow: 1 } },
+    ],
+  };
 
   return (
-    <div className="container mt-8">
-      <div className="w-md-100 w-lg-100 mb-3 mb-md-5 text-center">
-        <h2 className="h1">Georgian cargo is loved by users worldwide</h2>
+    <section className="gc-testimonials" aria-labelledby="gc-testimonials-title">
+      <div className="container">
+
+        {/* Header + inline arrow controls */}
+        <div className="gc-testimonials__head">
+          <div className="gc-testimonials__head-text">
+            <p className="gc-testimonials__eyebrow">Trusted Worldwide</p>
+            <h2 id="gc-testimonials-title" className="gc-testimonials__title">
+              Loved by customers worldwide
+            </h2>
+            <p className="gc-testimonials__subtitle">
+              Real feedback from people who ship with us every day.
+            </p>
+          </div>
+          <div className="gc-testimonials__controls" aria-label="Slider controls">
+            <button
+              className="gc-t-arrow"
+              onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
+              aria-label="Previous"
+            >
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" width="18" height="18">
+                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <button
+              className="gc-t-arrow"
+              onClick={() => sliderRef.current && sliderRef.current.slickNext()}
+              aria-label="Next"
+            >
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" width="18" height="18">
+                <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Slider — no overflow clipping, arrows never touch edges */}
+        <div className="gc-testimonials__track">
+          <SlickSlider ref={sliderRef} {...slickSettings}>
+            {testimonials.map(({ content, name, src, srcFallback }, i) => (
+              <div key={i} className="gc-tcard-wrap">
+                <article className="gc-tcard">
+                  <div className="gc-tcard__top">
+                    <div className="gc-tcard__stars" aria-label="5 out of 5 stars">
+                      {[0,1,2,3,4].map(n => (
+                        <svg key={n} className="gc-tcard__star" viewBox="0 0 20 20" aria-hidden="true">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="gc-tcard__quote">{content}</p>
+                  </div>
+                  <footer className="gc-tcard__footer">
+                    <picture>
+                      <source srcSet={src} type="image/webp" />
+                      <img className="gc-tcard__avatar" src={srcFallback || src} alt={name} loading="lazy" width="44" height="44" />
+                    </picture>
+                    <div>
+                      <p className="gc-tcard__name">{name}</p>
+                      <p className="gc-tcard__badge">
+                        <i className="bi bi-patch-check-fill" aria-hidden="true"></i> Verified customer
+                      </p>
+                    </div>
+                  </footer>
+                </article>
+              </div>
+            ))}
+          </SlickSlider>
+        </div>
+
       </div>
-      <div className="card-gutters-2">
-        <Slider xl={3}>
-          {testimonials.map((testimonial, i) => (
-            <Testimonial {...testimonial} key={i} />
-          ))}
-        </Slider>
-      </div>
-    </div>
+    </section>
   );
 };
 
 const Stats = () => {
+  const items = [
+    {
+      color: "#f59e0b",
+      value: "5 / 5",
+      label: "Rating",
+      sub: "from 19 verified reviews",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>
+        </svg>
+      ),
+    },
+    {
+      color: "#1ca3dd",
+      value: "10,000+",
+      label: "Customers served",
+      sub: "across Europe and beyond",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      ),
+    },
+    {
+      color: "#10b981",
+      value: "70,500+",
+      label: "Parcels shipped",
+      sub: "safely delivered worldwide",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      ),
+    },
+  ];
+
   return (
-    <div className="container mt-6">
-      <div className="row justify-content-lg-center">
-        <div className="col-md-4 mb-7 mb-lg-0">
-          <div data-aos="fade-up" data-aos-delay="100">
-            <div className="text-center px-md-3 px-lg-7">
-              <figure className="mb-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  x="0px"
-                  y="0px"
-                  viewBox="0 0 71.7 64"
-                  width="71"
-                  height="64"
-                >
-                  <path
-                    fill="#FFC107"
-                    d="M36.8,14.6L42,25.3c0,0.2,0.2,0.2,0.3,0.3L54,27.2c0.3,0,0.5,0.5,0.3,0.8l-8.5,8.2c-0.2,0.2-0.2,0.3-0.2,0.5
-                    l2,11.7c0,0.3-0.3,0.7-0.7,0.5l-10.5-5.6c-0.2,0-0.3,0-0.5,0l-10.5,5.6c-0.3,0.2-0.8-0.2-0.7-0.5l2-11.7c0-0.2,0-0.3-0.2-0.5
-                    L18,28.1c-0.3-0.3-0.2-0.8,0.3-0.8L30,25.6c0.2,0,0.3-0.2,0.3-0.3l5.3-10.7C36.1,14.2,36.6,14.2,36.8,14.6z"
-                  />
-                  <path
-                    opacity=".25"
-                    fill="#FFC107"
-                    d="M56,5.9l1.5,2.8c0,0,0,0,0.2,0l3.1,0.5c0.2,0,0.2,0.2,0,0.2l-2.3,2.3c0,0,0,0,0,0.2l0.5,3.1
-                    c0,0.2-0.2,0.2-0.2,0.2L56,13.6h-0.2L53,15.1c-0.2,0-0.2,0-0.2-0.2l0.5-3.1v-0.2l-2.3-2.3V9.2l3.1-0.5c0,0,0,0,0.2,0l1.5-2.8
-                    C55.8,5.7,55.8,5.7,56,5.9z"
-                  />
-                  <path
-                    opacity=".25"
-                    fill="#FFC107"
-                    d="M12.3,0.3l1.3,2.8c0,0,0,0,0.2,0l3,0.5c0.2,0,0.2,0.2,0,0.2l-2.1,2.1c0,0,0,0,0,0.2l0.5,3
-                    c0,0.2-0.2,0.2-0.2,0.2l-2.6-1.5c0,0,0,0-0.2,0L9.5,9.2c-0.2,0-0.2,0-0.2-0.2l0.5-3c0,0,0,0,0-0.2L7.5,3.7V3.6l3-0.5c0,0,0,0,0.2,0
-                    l1.3-2.8C12.1,0.3,12.3,0.3,12.3,0.3z"
-                  />
-                  <path
-                    opacity=".25"
-                    fill="#FFC107"
-                    d="M13.9,49.9l1.5,2.8c0,0,0,0,0.2,0l3.1,0.5c0.2,0,0.2,0.2,0,0.2l-2.3,2.3c0,0,0,0,0,0.2l0.5,3.1
-                    c0,0.2-0.2,0.2-0.2,0.2l-2.8-1.5h-0.2L11,59.1c-0.2,0-0.2,0-0.2-0.2l0.5-3.1v-0.2L9,53.4v-0.2l3.1-0.5c0,0,0,0,0.2,0l1.3-2.8
-                    C13.8,49.8,13.9,49.8,13.9,49.9z"
-                  />
-                  <path
-                    opacity=".25"
-                    fill="#FFC107"
-                    d="M60.8,53.5l1.6,3.1c0,0,0,0,0.2,0l3.5,0.5c0.2,0,0.2,0.2,0,0.3l-2.5,2.5c0,0,0,0,0,0.2l0.7,3.5
-                    c0,0.2-0.2,0.2-0.2,0.2l-3.1-1.6h-0.2l-3.1,1.6c-0.2,0-0.2,0-0.2-0.2l0.7-3.5v-0.2l-2.5-2.5c-0.2-0.2,0-0.2,0-0.3l3.5-0.5h0.2
-                    l1.6-3.1C60.4,53.4,60.6,53.4,60.8,53.5z"
-                  />
-                </svg>
-              </figure>
-              <p className="mb-0">
-                <span className="text-dark fw-bold">
-                  5 out of 5 starts
-                </span>
-                from 19 reviews
-              </p>
+    <div className="gc-stats">
+      <div className="container">
+        <div className="gc-stats__grid">
+          {items.map(({ color, value, label, sub, icon }) => (
+            <div key={label} className="gc-stats__item">
+              <div className="gc-stats__icon-wrap" style={{ background: `${color}18`, color }}>
+                {icon}
+              </div>
+              <div>
+                <p className="gc-stats__value">{value}</p>
+                <p className="gc-stats__label">{label}</p>
+                <p className="gc-stats__sub">{sub}</p>
+              </div>
             </div>
-          </div>
-        </div>
-
-        <div className="col-md-4 mb-7 mb-lg-0">
-          <div data-aos="fade-up">
-            <div className="text-center column-divider-md column-divider-20deg px-md-3 px-lg-7">
-              <figure className="mb-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  x="0px"
-                  y="0px"
-                  viewBox="0 0 71.7 64"
-                  width="71"
-                  height="64"
-                >
-                  <defs>
-                    <circle id="SVGID_1_" cx="50.9" cy="43.1" r="18.9" />
-                  </defs>
-                  <clipPath id="SVGID_2_">
-                    <use xlinkHref="#SVGID_1_" />
-                  </clipPath>
-                  <g
-                    transform="matrix(1 0 0 1 0 1.907349e-06)"
-                    style={{ clipPath: "url(#SVGID_2_)" }}
-                  >
-                    <image
-                      width="100"
-                      height="100"
-                      xlinkHref="/images/client_2.jpg"
-                      transform="matrix(0.36 0 0 0.36 32.8571 25.1429)"
-                    />
-                  </g>
-                  <use
-                    xlinkHref="#SVGID_1_"
-                    fill="none"
-                    stroke="#FFFFFF"
-                    strokeWidth="4"
-                  />
-                  <defs>
-                    <circle id="SVGID_3_" cx="34.6" cy="20.9" r="18.9" />
-                  </defs>
-                  <clipPath id="SVGID_4_">
-                    <use xlinkHref="#SVGID_3_" />
-                  </clipPath>
-                  <g style={{ clipPath: "url(#SVGID_4_)" }}>
-                    <image
-                      width="100"
-                      height="100"
-                      xlinkHref="/images/client_3.jpg"
-                      transform="matrix(0.36 0 0 0.36 16.5714 2.8571)"
-                    />
-                  </g>
-                  <use
-                    xlinkHref="#SVGID_3_"
-                    fill="none"
-                    stroke="#FFFFFF"
-                    strokeWidth="4"
-                  />
-                  <defs>
-                    <circle id="SVGID_5_" cx="20.9" cy="43.1" r="18.9" />
-                  </defs>
-                  <clipPath id="SVGID_6_">
-                    <use xlinkHref="#SVGID_5_" />
-                  </clipPath>
-                  <g style={{ clipPath: "url(#SVGID_6_)" }}>
-                    <image
-                      width="100"
-                      height="100"
-                      xlinkHref="/images/client_4.jpg"
-                      transform="matrix(0.3771 0 0 0.3771 2 24.2857)"
-                    />
-                  </g>
-                  <use
-                    xlinkHref="#SVGID_5_"
-                    fill="none"
-                    stroke="#FFFFFF"
-                    strokeWidth="4"
-                  />
-                </svg>
-              </figure>
-              <p className=" mb-0">
-                Over
-                <span className="text-dark fw-bold"> 10,000 </span>
-                Customers served
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4">
-          <div data-aos="fade-up" data-aos-delay="100">
-            <div className="text-center column-divider-md column-divider-20deg px-md-3 px-lg-7">
-              <figure className="max-w-8rem mx-auto mb-3">
-                <img
-                  className="img-fluid w-25"
-                  src="/theme/assets/svg/icons/icon-64.svg"
-                  alt="SVG"
-                />
-              </figure>
-              <p className="mb-0">
-                <span className="text-dark fw-bold">70,500 </span>
-                Parcels shipped
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
   );
 };
+
 const Articles = () => {
   return (
     <></>

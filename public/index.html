@@ -25,13 +25,21 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
 
+  <!-- Preload LCP hero image in WebP -->
+  <link rel="preload" as="image" href="/responsive-example.webp" type="image/webp" />
+
   <link rel="stylesheet" href="/theme/assets/css/theme.min.css?88679880" />
   <link rel="stylesheet" href="/theme/assets/vendor/font-awesome/css/all.min.css" />
   <link rel="stylesheet" href="/theme/assets/vendor/hs-mega-menu/dist/hs-mega-menu.min.css" />
-  <link rel="stylesheet" type="text/css" charset="UTF-8"
-    href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
-  <link rel="stylesheet" type="text/css"
-    href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
+
+  <!-- Slick carousel CSS loaded non-blocking -->
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
+  </noscript>
+
   <title>Georgian Cargo</title>
 </head>
 
@@ -41,12 +49,12 @@
   <div id="root"></div>
   <div id="loader"></div>
   <!-- <script src="/theme/assets/vendor/popper.min.js"></script> -->
-  <script src="/theme/assets/vendor/jquery/dist/jquery.min.js"></script>
-  <script src="/theme/assets/vendor/jquery-migrate/dist/jquery-migrate.min.js"></script>
-  <script src="/theme/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/theme/assets/js/hs.core.js"></script>
-  <script src="/theme/assets/js/hs-header.min.js"></script>
-  <script src="/theme/assets/js/theme.min.js"></script>
+  <script defer src="/theme/assets/vendor/jquery/dist/jquery.min.js"></script>
+  <script defer src="/theme/assets/vendor/jquery-migrate/dist/jquery-migrate.min.js"></script>
+  <script defer src="/theme/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="/theme/assets/js/hs.core.js"></script>
+  <script defer src="/theme/assets/js/hs-header.min.js"></script>
+  <script defer src="/theme/assets/js/theme.min.js"></script>
   <script>
     (function () {
       // INITIALIZATION OF NAVBAR

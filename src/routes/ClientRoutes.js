@@ -1,36 +1,31 @@
-import {
-  HomePage,
-  LoginModal,
-  NotFoundPage,
-  RegisterModal,
-} from "components/Pages";
+import { HomePage, LoginModal, NotFoundPage, RegisterModal } from "components/Pages";
 import { ClientNavbar } from "components/Navbar";
-import React, { useEffect } from "react";
-import { Redirect, Route, Switch, useLocation, Outlet } from "react-router-dom";
+import React, { useEffect, lazy, Suspense } from "react";
+import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import { ClientFooter } from "../components/Footer";
 import { AuthContext } from "context";
 import { useContext } from "react";
-import { PrivateCargoTable } from "components/PrivateCargoTable";
-import PrivateCargoCart from "components/PrivateCargoCart/PrivateCargoCart";
-import ClientPersonalInfo from "components/ClientPersonalInfo/ClientPersonalInfo";
-import RegistrationSucess from "../components/Pages/RegistrationSucess.js";
-import ResetPasswordModal from "components/Pages/ResetPasswordModal";
-import ForgotPasswordForm from "components/ForgotPasswordForm/ForgotPasswordForm";
-import ClientPayments from "components/PrivateCustomerPayments/PrivateCustomerPayments";
-import ClientAddress from "components/ClientAddress/ClientAddress";
-import ContactUs from "components/ContactUs/ContactUs";
-import About from "components/About/About";
 import { useCookies } from "react-cookie";
-import BookCourier from "components/BookCourier/BookCourier";
-import ClientBookings from "components/ClientBookings/ClientBookings";
 import { ClientProtectedRoute } from "components/ClientProtectedRoute.js";
-import VerifyCustomer from "components/VerifyCustomer/VerifyCustomer";
-import PrivacyPolicy from "components/PrivacyPolicy/PrivacyPolicy";
-import LoginPage from "components/LoginPage";
-import RegisterPage from "components/RegisterPage";
-import ClientNotifications from "components/ClientNotifications";
-import ClientCoupons from "components/ClientCoupons";
-import Loyalty from "components/Loyalty";
+
+// Lazy-loaded route chunks — only downloaded when the user navigates to them
+const PrivateCargoTable   = lazy(() => import("components/PrivateCargoTable").then(m => ({ default: m.PrivateCargoTable })));
+const PrivateCargoCart    = lazy(() => import("components/PrivateCargoCart/PrivateCargoCart"));
+const ClientPersonalInfo  = lazy(() => import("components/ClientPersonalInfo/ClientPersonalInfo"));
+const RegistrationSucess  = lazy(() => import("../components/Pages/RegistrationSucess.js"));
+const ResetPasswordModal  = lazy(() => import("components/Pages/ResetPasswordModal"));
+const ForgotPasswordForm  = lazy(() => import("components/ForgotPasswordForm/ForgotPasswordForm"));
+const ClientPayments      = lazy(() => import("components/PrivateCustomerPayments/PrivateCustomerPayments"));
+const ClientAddress       = lazy(() => import("components/ClientAddress/ClientAddress"));
+const ContactUs           = lazy(() => import("components/ContactUs/ContactUs"));
+const About               = lazy(() => import("components/About/About"));
+const BookCourier         = lazy(() => import("components/BookCourier/BookCourier"));
+const ClientBookings      = lazy(() => import("components/ClientBookings/ClientBookings"));
+const VerifyCustomer      = lazy(() => import("components/VerifyCustomer/VerifyCustomer"));
+const PrivacyPolicy       = lazy(() => import("components/PrivacyPolicy/PrivacyPolicy"));
+const ClientNotifications = lazy(() => import("components/ClientNotifications"));
+const ClientCoupons       = lazy(() => import("components/ClientCoupons"));
+const Loyalty             = lazy(() => import("components/Loyalty"));
 
 const ClientRoutes = () => {
   const { auth, setAuth } = useContext(AuthContext);
@@ -52,7 +47,7 @@ const ClientRoutes = () => {
       <Route path="(.+)/login" component={LoginModal} />
       <Route path="(.+)/register" component={RegisterModal} />
 
-
+      <Suspense fallback={<div style={{ textAlign: "center", padding: "40px" }}>Loading...</div>}>
       <Switch>
         {/* <Route path="/login" component={LoginPage} />
         <Route path="/register" component={RegisterPage} /> */}
@@ -143,6 +138,7 @@ const ClientRoutes = () => {
           <Redirect replace to="/" />
         </Route>
       </Switch>
+      </Suspense>
     </>
   );
 };

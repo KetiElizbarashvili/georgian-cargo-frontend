@@ -4,7 +4,20 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const CustomeSlider = ({children, xl = 4, lg = 3, md = 2, sm = 1}) => {
+const CustomeSlider = ({
+    children,
+    xl = 4,
+    lg = 3,
+    md = 2,
+    sm = 1,
+    infinite = false,
+    autoplay = false,
+    autoplaySpeed = 4500,
+    speed = 500,
+    arrows = true,
+    dots = true,
+    className = "",
+}) => {
     function NextArrow(props) {
         const {className, style, onClick} = props;
         return (
@@ -28,14 +41,20 @@ const CustomeSlider = ({children, xl = 4, lg = 3, md = 2, sm = 1}) => {
     }
 
     const settings = {
-        dots: true,
-        infinite: false,
-        speed: 500,
+        dots,
+        infinite,
+        autoplay,
+        autoplaySpeed,
+        speed,
         slidesToShow: 4,
         slidesToScroll: 1,
         initialSlide: 0,
-        nextArrow: <NextArrow />,
-        prevArrow: <PrevArrow />,
+        arrows,
+        pauseOnHover: true,
+        swipeToSlide: true,
+        nextArrow: arrows ? <NextArrow /> : undefined,
+        prevArrow: arrows ? <PrevArrow /> : undefined,
+        className,
         responsive: [
             {breakpoint: 1200, settings: {slidesToShow: xl}},
             {breakpoint: 992, settings: {slidesToShow: lg}},

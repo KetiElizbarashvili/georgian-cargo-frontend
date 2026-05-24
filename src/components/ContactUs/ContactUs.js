@@ -78,7 +78,7 @@ const ContactUs = () => {
                 <h5 className="mb-1">Email us:</h5>
                 <a href="mailto:admin@georgiancargo.co.uk">admin@georgiancargo.co.uk</a>
                 <h5 className="mb-1 mt-2">Georgian Address:</h5>
-                <a className="link-sm link-primary" href="https://goo.gl/maps/Pzdwn7sdzSNy4zAW7"><i className="bi-geo-alt-fill me-1"></i>&nbsp;25 Nadira Khosharauli Street, street,  0119, Tbilisi, Georgia</a>
+                <a className="link-sm link-primary" href="https://goo.gl/maps/Pzdwn7sdzSNy4zAW7"><i className="bi-geo-alt-fill me-1"></i>&nbsp;Nadira Khosharauli #3</a>
                 <h5 className="mb-1 mt-2">UK Address:</h5>
                 <a className="link-sm link-primary" href="https://g.page/GergianCargo?share"><i className="bi-geo-alt-fill me-1"></i>&nbsp; Georgian Cargo, (Safe Store), 105 Mayes Rd, London N22 6UP</a>
               </div>

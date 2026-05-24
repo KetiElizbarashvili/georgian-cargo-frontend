@@ -1,15 +1,17 @@
-import React, {useContext} from "react";
+import React, { useContext, lazy, Suspense } from "react";
 import {Redirect, Route, Switch} from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
 import {NotFoundPage} from "components/Pages";
-import AdminLogin from "../components/Pages/AdminLogin";
-import AdminLogout from "../components/Pages/AdminLogout";
-import AdminDashboard from "../components/Pages/AdminDashboard";
 import {AuthContext} from "../context";
+
+const AdminLogin     = lazy(() => import("../components/Pages/AdminLogin"));
+const AdminLogout    = lazy(() => import("../components/Pages/AdminLogout"));
+const AdminDashboard = lazy(() => import("../components/Pages/AdminDashboard"));
 
 const AdminRoutes = () => {
   const {auth} = useContext(AuthContext);
     return (
+      <Suspense fallback={<div style={{ textAlign: "center", padding: "40px" }}>Loading...</div>}>
       <Switch>
         {!auth.isLoggedIn ? (
           <Route path="/manage/login" component={AdminLogin} />
@@ -28,6 +30,7 @@ const AdminRoutes = () => {
 
         <Redirect replace to="/not-found" />
       </Switch>
+      </Suspense>
     );
 };
 export default AdminRoutes;

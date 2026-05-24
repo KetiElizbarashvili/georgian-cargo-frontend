@@ -117,7 +117,7 @@ const ClientNav = ({ user }) => {
               <div className="card-body">
                 <div className="d-none d-lg-block text-center mb-5">
                   <div className="avatar avatar-lg avatar-circle mb-2">
-                    <img className="p-0 avatar-img" src={`http://www.gravatar.com/avatar/${md5(auth.staff.email)}`} alt="Image Description" />
+                    <img className="p-0 avatar-img" src={`http://www.gravatar.com/avatar/${md5(auth.staff.email)}`} alt="Staff Avatar" width="40" height="40" />
                   </div>
                   <h4 className="card-title mb-0">{auth.staff?.username || ''}</h4>
                   <p className="card-text small">{auth.staff?.email}</p>

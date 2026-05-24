@@ -33,203 +33,149 @@ const ClientNavbar = () => {
 
   return (
     <>
-      <Link className="navbar-brand d-none d-lg-block d-xl-non d-xxl-none" to="/home" aria-label="Front">
-        <img className="navbar-brand-logo pt-lg-2 d-none d-lg-block d-xl-none d-xxl-none mx-lg-auto"
-          style={{ minWidth: "5.5rem", maxWidth: "8.5rem" }}
-          src="/logo2.png" alt="Logo" />
-      </Link>
-      <header className="navbar sticky-top navbar-expand-lg mt-xl-n2 mt-xxl-n2 navbar-start mb-3">
-        <div className="container" style={{ backgroundColor: "#e5eef3", marginTop: "-8px" }}>
-          <div className="navbar-nav-wrap">
-            <div className="navbar-brand-wrapper">
-              <Link className="navbar-brand d-none d-lg-none d-xl-block d-xxl-block" to="/home" aria-label="Front" style={{ padding: ".2rem .4rem" }}>
-                <img className="navbar-brand-logo pt-lg-2 pt-xl-2 pt-xxl-2"
-                  style={{ minWidth: "7.5rem", maxWidth: "9.5rem" }}
-                  src="/logo2.png" alt="Logo" />
-              </Link>
-              <Link className="navbar-brand d-md-block d-lg-none d-xl-none d-xxl-none d-block d-sm-block" to="/home" aria-label="Front" style={{ padding: ".8rem .4rem" }}>
-                <img className="navbar-brand-logo pt-lg-9 pt-xl-9 pt-xxl-9"
-                  style={{ minWidth: "7.5rem", maxWidth: "9.5rem" }}
-                  src="/logo.png" alt="Logo" />
-              </Link>
-            </div>
+      <header className="gc-navbar">
+        <div className="gc-navbar__inner">
 
-            <button type="button" className="bg-transparent navbar-toggler ms-auto" data-bs-toggle="collapse" data-bs-target="#navbarNavMenuLeftAligned" aria-label="Toggle navigation" aria-expanded={collapseShow} aria-controls="navbarNavMenuLeftAligned">
-              <span onClick={() => setCollapseShop(true)} className={collapseShow ? 'd-none' : 'd-block'}>
-                <i className="bi-list"></i>
-              </span>
-              <span onClick={() => setCollapseShop(false)} className={collapseShow ? 'd-block' : 'd-none'}>
-                <i className="bi-x"></i>
-              </span>
-            </button>
+          {/* Logo */}
+          <Link className="gc-navbar__logo" to="/home" aria-label="Georgian Cargo Home">
+            <img
+              src="/logo2.png"
+              alt="Georgian Cargo"
+              width="160"
+              height="50"
+              style={{ width: "160px", height: "50px", objectFit: "contain" }}
+            />
+          </Link>
 
-            <nav className={"bg-transparent navbar-nav-wrap-col text-center collapse navbar-collapse " + (collapseShow ? 'show' : '')} id="navbarNavMenuLeftAligned">
-              <ul className="navbar-nav" >
-                <li className="nav-item" style={Util.checkIsActive(location, "/home") ? {} : {}}>
-                  <Link className={"nav-link active ps-4 pe-4" + (Util.checkIsActive(location, "/home") ? ' text-primary' : '')}
-                    to="/home" style={{ padding: ".8rem .4rem" }}>
-                    <i className="bi bi-house-door-fill"></i>
-                  </Link>
-                </li>
+          {/* Desktop nav links */}
+          <nav className="gc-navbar__links d-none d-lg-flex">
+            <Link className={"gc-navbar__link" + (Util.checkIsActive(location, "/home") ? " gc-navbar__link--active" : "")} to="/home">
+              <i className="bi bi-house-door me-1"></i> Home
+            </Link>
+            <Link className={"gc-navbar__link" + (Util.checkIsActive(location, "/book") || hash === '#booking' ? " gc-navbar__link--active" : "")} to="/home#booking">
+              Booking
+            </Link>
+            <Link className={"gc-navbar__link" + (Util.checkIsActive(location, "/tracking") || hash === '#tracking' ? " gc-navbar__link--active" : "")} to="/home#tracking">
+              Tracking
+            </Link>
+            <Link className={"gc-navbar__link" + (Util.checkIsActive(location, "/about") ? " gc-navbar__link--active" : "")} to="/about">
+              About
+            </Link>
+            <Link className={"gc-navbar__link" + (Util.checkIsActive(location, "/contact-us") ? " gc-navbar__link--active" : "")} to="/contact-us">
+              Contact
+            </Link>
+          </nav>
 
-                {/* <li className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle text-white" href="#" id="navbarLeftAlignedDropdownSubMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
+          {/* Desktop right actions */}
+          <div className="gc-navbar__actions d-none d-lg-flex">
+            <a className="gc-navbar__shop-btn" href="https://akido.me" target="_blank" rel="noreferrer">
+              <i className="bi bi-bag-heart me-1"></i> Online Shopping
+            </a>
 
-                  <div className="dropdown-menu" aria-labelledby="navbarLeftAlignedDropdownSubMenu" style={{ minWidth: "230px" }}>
-                    <a className="dropdown-item text-white" href="#">Action</a>
-                    <a className="dropdown-item text-white" href="#">Another action</a>
-                    <div className="dropdown-divider"></div>
-                    <a className="dropdown-item text-white" href="#">Something else here</a>
-                  </div>
-                </li>
+            {!isLoggedIn && (
+              <>
+                <Link className="gc-navbar__signin" to={`${history.location.pathname}/login`}>Sign In</Link>
+                <Link className="gc-navbar__signup" to={`${history.location.pathname}/register`}>Sign Up</Link>
+              </>
+            )}
 
-                <li className="nav-item">
-                  <a className="nav-link dropdown-toggle text-white" href="#" id="navbarLeftAlignedMegaMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mega menu</a>
+            {isLoggedIn && isLoggedInClient && (
+              <>
+                <Link className="gc-navbar__user" to="/dashboard/cargos">
+                  <i className="bi bi-person-circle me-1"></i>
+                  {[auth.staff?.username, auth.staff?.email, 'Dashboard']?.find(el => el != null).replace(/(.{8})..+/, "$1…")}
+                </Link>
+                <button className="gc-navbar__logout" onClick={logout}>Log Out</button>
+              </>
+            )}
 
-                  <div className="dropdown-menu w-100" aria-labelledby="navbarLeftAlignedMegaMenu">
-                    <div className="row">
-                      <div className="col-lg-3 mb-3 mb-lg-0">
-                        <span className="dropdown-header">One</span>
-
-                        <a className="dropdown-item text-white" href="#">One</a>
-                        <a className="dropdown-item text-white" href="#">Two</a>
-                        <a className="dropdown-item text-white" href="#">Three</a>
-                      </div>
-
-                      <div className="col-lg-3 mb-3 mb-lg-0">
-                        <span className="dropdown-header">Two</span>
-
-                        <a className="dropdown-item text-white" href="#">One</a>
-                        <a className="dropdown-item text-white" href="#">Two</a>
-                        <a className="dropdown-item text-white" href="#">Three</a>
-                      </div>
-
-                      <div className="col-lg-3 mb-3 mb-lg-0">
-                        <span className="dropdown-header text-white">Three</span>
-
-                        <a className="dropdown-item text-white" href="#">One</a>
-                        <a className="dropdown-item text-white" href="#">Two</a>
-                      </div>
-
-                      <div className="col-lg-3">
-                        <span className="dropdown-header text-white">Four</span>
-
-                        <a className="dropdown-item text-white" href="#">One</a>
-                        <a className="dropdown-item text-white" href="#">Two</a>
-                        <a className="dropdown-item text-white" href="#">Three</a>
-                      </div>
-                    </div>
-                  </div>
-                </li> */}
-
-                <li className="nav-item text-secondary" style={Util.checkIsActive(location, "/book") || hash === '#booking' ? {} : {}}>
-                  <Link className={"nav-link " + (Util.checkIsActive(location, "/book") || hash === '#booking' ? ' text-primary' : ' ')}
-                    to="/home#booking" style={{ padding: ".8rem .4rem" }}>Booking
-                  </Link>
-                </li>
-                <li className="nav-item text-secondary" style={Util.checkIsActive(location, "/trackig") || hash === '#tracking' ? {} : {}}>
-                  <Link className={"nav-link " + (Util.checkIsActive(location, "/trackig") || hash === '#tracking' ? ' text-primary' : ' ')}
-                    to="/home#tracking" style={{ padding: ".8rem .4rem" }}>Tracking
-                  </Link>
-                </li>
-                <li className="nav-item text-secondary" style={Util.checkIsActive(location, "/about") ? {} : {}}>
-                  <Link className={"nav-link " + (Util.checkIsActive(location, "/about") ? ' text-primary' : ' ')}
-                    to="/about" style={{ padding: ".8rem .4rem" }}>About
-                  </Link>
-                </li>
-                {/*<li className="nav-item text-secondary" style={Util.checkIsActive(location, "/services") ? {} : {}}>
-                  <a className="nav-link " href="#" style={{ padding: ".8rem .4rem" }}>Services</a>
-                </li>
-                <li className="nav-item text-secondary" style={Util.checkIsActive(location, "/news") ? {} : {}}>
-                  <a className="nav-link" href="#" style={{ padding: ".8rem .4rem" }}>News</a>
-              </li>*/}
-                <li className="nav-item text-secondary" style={Util.checkIsActive(location, "/contact-us") ? {} : {}}>
-                  <Link className={"nav-link " + (Util.checkIsActive(location, "/contact-us") ? ' text-primary' : ' ')} to="contact-us" style={{ padding: ".8rem .4rem" }}>Contact Us</Link>
-                </li>
-              </ul>
-              <ul className="justify-content-end navbar-nav">
-
-                {!isLoggedIn && (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link"
-                        to={`${history.location.pathname}/login`}
-                        style={{ padding: ".8rem .4rem" }} >Sign In</Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link btn btn-primary rounded-0 text-white"
-                        to={`${history.location.pathname}/register`}
-                        style={{ padding: ".8rem .4rem" }}>Sign Up</Link>
-                    </li>
-                  </>
-                )}
-
-                {isLoggedIn && (
-                  <>
-                    {isLoggedInClient && (
-                      <>
-                        <li className="nav-item">
-                          <Link
-                            className="nav-link"
-                            onClick={() => history.push("/dashboard/cargos")}
-                            to={"/dashboard/cargos"}
-                            style={{ padding: ".8rem .4rem" }}
-                          >
-                            Hello, {[auth.staff?.username, auth.staff?.email, 'Dashboard']?.find(el => el != null).replace(/(.{8})..+/, "$1…")}
-                          </Link>
-                        </li>
-
-                        <li className="nav-item">
-                          <Link
-                            className="nav-link"
-                            onClick={logout}
-                            style={{ padding: ".8rem .4rem" }}
-                            to="#"
-                          >
-                            Log Out
-                          </Link>
-                        </li>
-                      </>
-                    )}
-                    {accountType === 'ADMIN' && (
-                      <>
-                        <li className="nav-item">
-                          <Link
-                            style={{ padding: ".8rem .4rem" }}
-                            className="nav-link text-warning"
-                            onClick={() => history.push("/manage/items")}
-                            to={"/manage/items"}
-                          >
-                            Admin panel
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            style={{ padding: ".8rem .4rem" }}
-                            className="nav-link text-warning "
-                            onClick={logout}
-                            to="#"
-
-                          >
-                            Log Out
-                          </Link>
-                        </li>
-                      </>
-                    )}
-                  </>
-                )}
-                <li className="nav-item">·</li>
-                <li className="nav-item">
-                  {/* <Link className="nav-link btn btn-danger rounded-0 text-white"
-                    onClick={() => setShoopSonn(true)}
-                    style={{ padding: ".8rem .4rem" }}><i className="bi bi-bag-heart me-1"></i> Online Shopping</Link> */}
-                  <a style={{ padding: ".8rem .4rem" }} className="nav-link btn btn-danger rounded-0 text-white" target="_blank" href="https://akido.me" title="Online shopping"><i className="bi bi-bag-heart me-1"></i> Online Shopping</a>
-                </li>
-              </ul>
-            </nav>
+            {isLoggedIn && accountType === 'ADMIN' && (
+              <>
+                <Link className="gc-navbar__admin" to="/manage/items">
+                  <i className="bi bi-shield-lock me-1"></i> Admin
+                </Link>
+                <button className="gc-navbar__logout" onClick={logout}>Log Out</button>
+              </>
+            )}
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="gc-navbar__toggler d-lg-none"
+            onClick={() => setCollapseShop(v => !v)}
+            aria-label="Toggle navigation"
+            aria-expanded={collapseShow}
+          >
+            {collapseShow ? (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="5" width="18" height="2" rx="1" fill="currentColor"/>
+                <rect x="2" y="10" width="18" height="2" rx="1" fill="currentColor"/>
+                <rect x="2" y="15" width="12" height="2" rx="1" fill="currentColor"/>
+              </svg>
+            )}
+          </button>
         </div>
-      </header >
+
+        {/* Mobile menu */}
+        {collapseShow && (
+          <div className="gc-navbar__mobile">
+            <nav className="gc-navbar__mobile-nav">
+              <Link className="gc-navbar__mobile-link" to="/home" onClick={() => setCollapseShop(false)}>
+                <i className="bi bi-house-door gc-navbar__mobile-icon"></i> Home
+              </Link>
+              <Link className="gc-navbar__mobile-link" to="/home#booking" onClick={() => setCollapseShop(false)}>
+                <i className="bi bi-box-seam gc-navbar__mobile-icon"></i> Booking
+              </Link>
+              <Link className="gc-navbar__mobile-link" to="/home#tracking" onClick={() => setCollapseShop(false)}>
+                <i className="bi bi-geo-alt gc-navbar__mobile-icon"></i> Tracking
+              </Link>
+              <Link className="gc-navbar__mobile-link" to="/about" onClick={() => setCollapseShop(false)}>
+                <i className="bi bi-info-circle gc-navbar__mobile-icon"></i> About
+              </Link>
+              <Link className="gc-navbar__mobile-link" to="/contact-us" onClick={() => setCollapseShop(false)}>
+                <i className="bi bi-envelope gc-navbar__mobile-icon"></i> Contact
+              </Link>
+            </nav>
+
+            <a className="gc-navbar__mobile-shop-btn" href="https://akido.me" target="_blank" rel="noreferrer">
+              <i className="bi bi-bag-heart"></i> Online Shopping
+            </a>
+
+            <div className="gc-navbar__mobile-auth">
+              {!isLoggedIn && (
+                <div className="gc-navbar__mobile-auth-btns">
+                  <Link className="gc-navbar__mobile-signin-btn" to={`${history.location.pathname}/login`} onClick={() => setCollapseShop(false)}>Sign In</Link>
+                  <Link className="gc-navbar__mobile-signup-btn" to={`${history.location.pathname}/register`} onClick={() => setCollapseShop(false)}>Sign Up</Link>
+                </div>
+              )}
+              {isLoggedIn && isLoggedInClient && (
+                <>
+                  <Link className="gc-navbar__mobile-link" to="/dashboard/cargos" onClick={() => setCollapseShop(false)}>
+                    <i className="bi bi-person-circle gc-navbar__mobile-icon"></i> Dashboard
+                  </Link>
+                  <button className="gc-navbar__mobile-logout-btn" onClick={() => { logout(); setCollapseShop(false); }}>
+                    <i className="bi bi-box-arrow-right"></i> Log Out
+                  </button>
+                </>
+              )}
+              {isLoggedIn && accountType === 'ADMIN' && (
+                <>
+                  <Link className="gc-navbar__mobile-link" to="/manage/items" onClick={() => setCollapseShop(false)}>
+                    <i className="bi bi-shield-lock gc-navbar__mobile-icon"></i> Admin Panel
+                  </Link>
+                  <button className="gc-navbar__mobile-logout-btn" onClick={() => { logout(); setCollapseShop(false); }}>
+                    <i className="bi bi-box-arrow-right"></i> Log Out
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </header>
       <Modal show={shopSoon} centered>
         <Modal.Header>
         </Modal.Header>
