@@ -5,32 +5,30 @@ import { currency_symbols } from 'utils/Currency';
 
 export const PublicPriceCalculator = ({ allRoutesData, redirectToBooking }) => {
     const [calculateCargoPricesPublicReq] = useRequest(calculateCargoPricesPublic);
-    const [calculatedPrice, setCalculatedPrice] = useState({
-        currency: currency_symbols('GBP'),
-        value: 0.00
-    });
+    const [calculatedPrice, setCalculatedPrice] = useState(null);
+    const [routeError, setRouteError] = useState(false);
     const [calculatePricesData, setCalculatePricesData] = useState({
         source_country_code: "",
         destination_country_code: "",
         collection_option: "HOME",
         delivery_option: "HOME",
         customer_type: "INDIVIDUAL",
-        parcel_type: "parcel",
+        parcel_type: "PARCEL",
         weight: '',
         packaging: 1,
         min_price: 0
     });
 
-    const hasPrice = calculatePricesData.source_country_code !== ''
+    const hasInputs = calculatePricesData.source_country_code !== ''
         && calculatePricesData.destination_country_code !== ''
         && parseInt(calculatePricesData.weight) > 0;
 
     useEffect(() => {
-        if (hasPrice) {
+        if (hasInputs) {
+            setRouteError(false);
             calculateCargoPricesPublicReq({ ...calculatePricesData, collection_option: "HOME", delivery_option: "HOME" }).then((res) => {
                 let obj = res.data.prices;
                 setCalculatedPrice({
-                    ...calculatedPrice,
                     currency: currency_symbols(obj.currency_code),
                     value: parseFloat(
                         (calculatePricesData.collection_option === 'HOME' ? obj.delivery_price : 0)
@@ -40,8 +38,12 @@ export const PublicPriceCalculator = ({ allRoutesData, redirectToBooking }) => {
                     ).toFixed(2)
                 });
             }).catch(() => {
-                setCalculatedPrice({ currency: '', value: 'Route unavailable' });
+                setCalculatedPrice(null);
+                setRouteError(true);
             });
+        } else {
+            setCalculatedPrice(null);
+            setRouteError(false);
         }
     }, [calculatePricesData]);
 
@@ -71,16 +73,17 @@ export const PublicPriceCalculator = ({ allRoutesData, redirectToBooking }) => {
 
             <div className="gc-calc__card">
                 {/* Price display */}
-                <div className="gc-calc__price-row">
+                <div className={`gc-calc__price-row${routeError ? ' gc-calc__price-row--error' : ''}`}>
                     <div className="gc-calc__price-box">
                         <span className="gc-calc__price-label">Estimated price</span>
-                        <span className={`gc-calc__price-value${hasPrice ? ' gc-calc__price-value--active' : ''}`}>
-                            {hasPrice ? `${calculatedPrice.currency}${calculatedPrice.value}` : '—'}
+                        <span className={`gc-calc__price-value${calculatedPrice ? ' gc-calc__price-value--active' : ''}`}>
+                            {calculatedPrice ? `${calculatedPrice.currency}${calculatedPrice.value}` : '—'}
                         </span>
-                        {hasPrice && <span className="gc-calc__price-note">incl. selected services</span>}
+                        {calculatedPrice && <span className="gc-calc__price-note">incl. selected services</span>}
+                        {routeError && <span className="gc-calc__price-note">No pricing found for this route</span>}
                     </div>
                     <div className="gc-calc__plane-icon">
-                        <i className="bi bi-airplane-engines"></i>
+                        <i className={routeError ? 'bi bi-exclamation-circle' : 'bi bi-airplane-engines'}></i>
                     </div>
                 </div>
 
