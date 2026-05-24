@@ -20,3 +20,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Production build output
+/build
+
+# Server deployment notes (contains credentials — never commit)
+Deploy.md
