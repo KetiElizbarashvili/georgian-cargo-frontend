@@ -21,133 +21,146 @@ export const PublicPriceCalculator = ({ allRoutesData, redirectToBooking }) => {
         min_price: 0
     });
 
+    const hasPrice = calculatePricesData.source_country_code !== ''
+        && calculatePricesData.destination_country_code !== ''
+        && parseInt(calculatePricesData.weight) > 0;
+
     useEffect(() => {
-        if (
-            calculatePricesData.source_country_code !== ''
-            && calculatePricesData.destination_country_code !== ''
-            && parseInt(calculatePricesData.weight) > 0) {
+        if (hasPrice) {
             calculateCargoPricesPublicReq({ ...calculatePricesData, collection_option: "HOME", delivery_option: "HOME" }).then((res) => {
                 let obj = res.data.prices;
                 setCalculatedPrice({
                     ...calculatedPrice,
                     currency: currency_symbols(obj.currency_code),
-                    value: parseFloat((calculatePricesData.collection_option === 'HOME' ? obj.delivery_price : 0) + obj.freight_price + obj.packaging_price + (calculatePricesData.delivery_option === 'HOME' ? obj.delivery_price : 0)).toFixed(2)
+                    value: parseFloat(
+                        (calculatePricesData.collection_option === 'HOME' ? obj.delivery_price : 0)
+                        + obj.freight_price
+                        + obj.packaging_price
+                        + (calculatePricesData.delivery_option === 'HOME' ? obj.delivery_price : 0)
+                    ).toFixed(2)
                 });
-            }).catch((error) => {
-                setCalculatedPrice({
-                    currency: '',
-                    value: 'Route does not exist!'
-                });
+            }).catch(() => {
+                setCalculatedPrice({ currency: '', value: 'Route unavailable' });
             });
         }
     }, [calculatePricesData]);
 
+    const toggle = (field) => setCalculatePricesData(prev => ({
+        ...prev,
+        [field]: field === 'packaging'
+            ? 1 - prev.packaging
+            : prev[field] === 'HOME' ? 'OFFICE' : 'HOME'
+    }));
+
+    const options = [
+        { field: 'collection_option', label: 'Pickup from address', icon: 'bi-house-up' },
+        { field: 'delivery_option',   label: 'Deliver to address',   icon: 'bi-house-down' },
+        { field: 'packaging',         label: 'Packaging service',    icon: 'bi-box-seam' },
+    ];
+
+    const isActive = (field) => field === 'packaging'
+        ? calculatePricesData.packaging === 1
+        : calculatePricesData[field] === 'HOME';
+
     return (
-        <figure className="figure w-100">
-            <figcaption className="figure-caption mb-4">
-                <h2 className="card-title mb-4 h4 text-primary" style={{ letterSpacing: ".3rem", textTransform: "uppercase" }}>Calculate Prices</h2>
-                <p className="card-text h4 text-muted w-100 mx-auto" ><i className="bi bi-info-circle-fill"></i>  Item will be weight checked at our storage and price may be corrected depending on the weight</p>
-            </figcaption>
-            <div className='container w-100'>
-                <div className="row mt-3 mx-3" style={{ marginTop: "25px" }}>
-                    <div className="col-md-12 justify-content-center">
-                        <div className="card card-custom pb-4">
-                            <div className="card-body mt-0 mx-5">
-                                <div className="text-center mb-3 pb-2 mt-3">
-                                    <div style={{ marginLeft: "10px" }} className="text-center">
-                                        <i className="bi bi-airplane-engines text-primary" style={{ fontSize: "60px" }}></i>
-                                        <span className="mt-3 text-primary h2 d-block w-100">{calculatedPrice.currency}{calculatedPrice.value}</span>
-                                    </div>
-                                </div>
+        <section className="gc-calc">
+            <div className="gc-calc__header">
+                <h2 className="gc-calc__title">Calculate Shipping Price</h2>
+                <p className="gc-calc__subtitle">Get an instant estimate — enter route and weight below</p>
+            </div>
 
-                                <form className="mb-0">
-
-                                    <div className="row mb-6">
-                                        <div className="col-12 col-md-6 mb-2 mb-md-0">
-                                            <div className="form-outline">
-                                                <select
-                                                    onChange={(e) => setCalculatePricesData({ ...calculatePricesData, source_country_code: e.target.value })}
-
-                                                    className="form-select" aria-label="Default select example">
-                                                    <option selected>Choose source country</option>
-                                                    {allRoutesData.map((c, i) => (
-                                                        <option key={i} value={c.value}>{c.label}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-md-6 mb-2 mb-md-0">
-                                            <div className="form-outline">
-                                                <select
-                                                    onChange={(e) => setCalculatePricesData({ ...calculatePricesData, destination_country_code: e.target.value })}
-                                                    className="form-select" aria-label="Default select example">
-                                                    <option selected>Choose destination country</option>
-                                                    {allRoutesData.map((c, i) => (
-                                                        <option key={i} value={c.value}>{c.label}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="row mb-6">
-                                        <div className="col-12 col-md-4 mb-2 mb-md-0">
-                                            <div className="form-outline">
-                                                <div className="form-check form-switch">
-                                                    <input className="form-check-input"
-                                                        checked={calculatePricesData.delivery_option === 'HOME'}
-                                                        onChange={(e) => setCalculatePricesData({ ...calculatePricesData, delivery_option: calculatePricesData.delivery_option === 'HOME' ? 'OFFICE' : 'HOME' })}
-                                                        type="checkbox" id="flexSwitchCheckDefault" />
-                                                    <label className="form-check-label fw-bold d-block w-100" for="flexSwitchCheckDefault">Pickup from my address</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-md-4 mb-2 mb-md-0">
-                                            <div className="form-outline">
-                                                <div className="form-check form-switch">
-                                                    <input className="form-check-input"
-                                                        checked={calculatePricesData.collection_option === 'HOME'}
-                                                        onChange={(e) => setCalculatePricesData({ ...calculatePricesData, collection_option: calculatePricesData.collection_option === 'HOME' ? 'OFFICE' : 'HOME' })}
-                                                        type="checkbox" id="flexSwitchCheckDefault" />
-                                                    <label className="form-check-label fw-bold d-block w-100" for="flexSwitchCheckDefault">Delivery to my address</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-md-4 mb-2 mb-md-0">
-                                            <div className="form-outline">
-                                                <div className="form-check form-switch">
-                                                    <input
-                                                        checked={calculatePricesData.packaging === 1}
-                                                        onChange={(e) => setCalculatePricesData({ ...calculatePricesData, packaging: 1 - calculatePricesData.packaging })}
-                                                        className="form-check-input" type="checkbox" id="switchpackaging" />
-                                                    <label className="form-check-label fw-bold d-block w-100" for="switchpackaging">Packaging service</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="row mb-4">
-                                        <div className="col-12 col-md-6 mx-auto">
-                                            <div className="form-outline">
-                                                <div class="form-floating mb-4">
-                                                    <input
-                                                        value={calculatePricesData.weight}
-                                                        onChange={(e) => setCalculatePricesData({ ...calculatePricesData, weight: parseFloat(e.target.value) })}
-                                                        type="number" name="email" id="weight" class="form-control form-control-lg shadow-none" placeholder="Weight" />
-                                                    <label class="form-label" for="weight">Weight in KG</label></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-12 col-md-4 mb-2 mx-auto">
-                                        <button className="form-control rounded-0 border-0 btn btn-secondary btn-lg" type="button" id="button-addon2"
-                                            onClick={redirectToBooking}
-                                        >Book Now</button>
-                                    </div>
-
-                                </form>
-                            </div>
-                        </div>
+            <div className="gc-calc__card">
+                {/* Price display */}
+                <div className="gc-calc__price-row">
+                    <div className="gc-calc__price-box">
+                        <span className="gc-calc__price-label">Estimated price</span>
+                        <span className={`gc-calc__price-value${hasPrice ? ' gc-calc__price-value--active' : ''}`}>
+                            {hasPrice ? `${calculatedPrice.currency}${calculatedPrice.value}` : '—'}
+                        </span>
+                        {hasPrice && <span className="gc-calc__price-note">incl. selected services</span>}
+                    </div>
+                    <div className="gc-calc__plane-icon">
+                        <i className="bi bi-airplane-engines"></i>
                     </div>
                 </div>
+
+                {/* Route selects */}
+                <div className="gc-calc__route">
+                    <div className="gc-calc__select-wrap">
+                        <label className="gc-calc__label">From</label>
+                        <select
+                            className="gc-calc__select"
+                            onChange={(e) => setCalculatePricesData({ ...calculatePricesData, source_country_code: e.target.value })}
+                        >
+                            <option value="">Select country</option>
+                            {allRoutesData.map((c, i) => (
+                                <option key={i} value={c.value}>{c.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="gc-calc__arrow">
+                        <i className="bi bi-arrow-right"></i>
+                    </div>
+
+                    <div className="gc-calc__select-wrap">
+                        <label className="gc-calc__label">To</label>
+                        <select
+                            className="gc-calc__select"
+                            onChange={(e) => setCalculatePricesData({ ...calculatePricesData, destination_country_code: e.target.value })}
+                        >
+                            <option value="">Select country</option>
+                            {allRoutesData.map((c, i) => (
+                                <option key={i} value={c.value}>{c.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Weight */}
+                <div className="gc-calc__weight-row">
+                    <label className="gc-calc__label">Parcel weight</label>
+                    <div className="gc-calc__weight-input-wrap">
+                        <input
+                            className="gc-calc__weight-input"
+                            type="number"
+                            min="0"
+                            placeholder="0.0"
+                            value={calculatePricesData.weight}
+                            onChange={(e) => setCalculatePricesData({ ...calculatePricesData, weight: parseFloat(e.target.value) })}
+                        />
+                        <span className="gc-calc__weight-unit">kg</span>
+                    </div>
+                </div>
+
+                {/* Options */}
+                <div className="gc-calc__options">
+                    {options.map(({ field, label, icon }) => (
+                        <button
+                            key={field}
+                            type="button"
+                            className={`gc-calc__option${isActive(field) ? ' gc-calc__option--on' : ''}`}
+                            onClick={() => toggle(field)}
+                        >
+                            <i className={`bi ${icon} gc-calc__option-icon`}></i>
+                            <span className="gc-calc__option-label">{label}</span>
+                            <span className="gc-calc__option-toggle">
+                                {isActive(field) ? 'On' : 'Off'}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+
+                {/* Info note */}
+                <p className="gc-calc__info">
+                    <i className="bi bi-info-circle"></i> Weight is verified at our warehouse — final price may be adjusted.
+                </p>
+
+                {/* CTA */}
+                <button className="gc-calc__cta" type="button" onClick={redirectToBooking}>
+                    Book Now <i className="bi bi-arrow-right ms-1"></i>
+                </button>
             </div>
-        </figure>
+        </section>
     );
 };
