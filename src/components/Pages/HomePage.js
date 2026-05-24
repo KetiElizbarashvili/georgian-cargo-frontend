@@ -17,7 +17,8 @@ import * as topojson from "topojson";
 import axios from 'axios';
 import { useCookies } from "react-cookie";
 import moment from "moment";
-import getRoutes from "requests/getRoutes";
+import getRoutes from "requests/getRoutes"
+import getRoutePairs from "requests/getRoutePairs";
 import countryListAllIsoData from 'utils/CountryList'
 import Steps from "components/BookCourier/Steps";
 import { PublicPriceCalculator } from 'components/PublicPriceCalculator';
@@ -142,7 +143,9 @@ const Hero = () => {
   const [destinationCountry, setDestinationCountry] = useState("GE");
   const [sourceCountry, setSourceCountry] = useState('UK');
   const [getRoutesData] = useRequest(getRoutes);
+  const [getRoutePairsData] = useRequest(getRoutePairs);
   const [allRoutesData, setAllRoutesData] = useState('');
+  const [routePairs, setRoutePairs] = useState([]);
   const history = useHistory();
 
   const handleResize = () => {
@@ -237,6 +240,9 @@ const Hero = () => {
         // stale/corrupt cookie — refetch on next render
       }
     }
+    getRoutePairsData().then((r) => {
+      if (Array.isArray(r?.data?.pairs)) setRoutePairs(r.data.pairs);
+    });
 
     // var width = 500,
     //   height = 500,
@@ -956,7 +962,7 @@ const Hero = () => {
           <hr className='mt-8 mb-8' />
           {allRoutesData && (
             <>
-              <PublicPriceCalculator allRoutesData={allRoutesData} redirectToBooking={redirectToBooking} />
+              <PublicPriceCalculator allRoutesData={allRoutesData} routePairs={routePairs} redirectToBooking={redirectToBooking} />
             </>
           )}
 

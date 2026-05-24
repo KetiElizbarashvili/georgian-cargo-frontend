@@ -3,7 +3,7 @@ import calculateCargoPricesPublic from 'requests/calculateCargoPricesPublic';
 import useRequest from "hooks/useRequest";
 import { currency_symbols } from 'utils/Currency';
 
-export const PublicPriceCalculator = ({ allRoutesData, redirectToBooking }) => {
+export const PublicPriceCalculator = ({ allRoutesData, routePairs = [], redirectToBooking }) => {
     const [calculateCargoPricesPublicReq] = useRequest(calculateCargoPricesPublic);
     const [calculatedPrice, setCalculatedPrice] = useState(null);
     const [routeError, setRouteError] = useState(false);
@@ -46,6 +46,17 @@ export const PublicPriceCalculator = ({ allRoutesData, redirectToBooking }) => {
             setRouteError(false);
         }
     }, [calculatePricesData]);
+
+    const validSources = routePairs.length > 0
+        ? allRoutesData.filter(c => routePairs.some(p => p.source_country_code === c.value))
+        : allRoutesData;
+
+    const validDestinations = calculatePricesData.source_country_code && routePairs.length > 0
+        ? allRoutesData.filter(c => routePairs.some(
+            p => p.source_country_code === calculatePricesData.source_country_code
+              && p.destination_country_code === c.value
+          ))
+        : allRoutesData;
 
     const toggle = (field) => setCalculatePricesData(prev => ({
         ...prev,
@@ -93,10 +104,15 @@ export const PublicPriceCalculator = ({ allRoutesData, redirectToBooking }) => {
                         <label className="gc-calc__label">From</label>
                         <select
                             className="gc-calc__select"
-                            onChange={(e) => setCalculatePricesData({ ...calculatePricesData, source_country_code: e.target.value })}
+                            value={calculatePricesData.source_country_code}
+                            onChange={(e) => setCalculatePricesData({
+                                ...calculatePricesData,
+                                source_country_code: e.target.value,
+                                destination_country_code: ''
+                            })}
                         >
                             <option value="">Select country</option>
-                            {allRoutesData.map((c, i) => (
+                            {(validSources || allRoutesData).map((c, i) => (
                                 <option key={i} value={c.value}>{c.label}</option>
                             ))}
                         </select>
@@ -110,10 +126,12 @@ export const PublicPriceCalculator = ({ allRoutesData, redirectToBooking }) => {
                         <label className="gc-calc__label">To</label>
                         <select
                             className="gc-calc__select"
+                            value={calculatePricesData.destination_country_code}
                             onChange={(e) => setCalculatePricesData({ ...calculatePricesData, destination_country_code: e.target.value })}
+                            disabled={!calculatePricesData.source_country_code}
                         >
                             <option value="">Select country</option>
-                            {allRoutesData.map((c, i) => (
+                            {(validDestinations || allRoutesData).map((c, i) => (
                                 <option key={i} value={c.value}>{c.label}</option>
                             ))}
                         </select>
